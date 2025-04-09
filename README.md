@@ -1,2 +1,10 @@
-# extdl_gui2
-Naro2mobi外部ダウンローダー用GUI-2
+# Naro2mobi外部ダウンローダー用GUI-2(Extdl_GUI2)
+Naro2mobi用外部ダウンローダーをGUI(Windowsのグラフィックユーザーインターフェイス)から使用するためのフロントエンドアプリケーションです。
+
+Extdl_GUIではシンプルなインターフェイスで都度ダウンロードしたいWeb小説作品トップページURLを指定してダウンロードする櫃世yがありましたが、このExtdl_GUI2ではNaro2mobiのDLリストのように複数の作品URLを登録して連続でダウンロードすることが出来ます。
+
+## 使い方
+Extdl_GUI2.exeをNaro2mobi用外部ダウンローダーと同じフォルダ内にコピーして下さい。尚、外部ダウンローダーを認識するために定義ファイルであるExtDLoade.txtも必要です。
+
+![extdlgui1](https://github.com/user-attachments/assets/0557d2fe-3492-4e3e-ab04-d560c83ad187)
+Extdl_GUI2.exeを起動すると、最初に使用できる外部ダウンローダーの一覧が表示されます。
