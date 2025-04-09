@@ -1,0 +1,181 @@
+object MainForm: TMainForm
+  Left = 339
+  Height = 422
+  Top = 250
+  Width = 640
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'ExtDL_GUI2'
+  ClientHeight = 422
+  ClientWidth = 640
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object URLList: TListBox
+    Left = 12
+    Height = 236
+    Top = 28
+    Width = 616
+    ItemHeight = 0
+    TabOrder = 0
+  end
+  object Label1: TLabel
+    Left = 13
+    Height = 15
+    Top = 8
+    Width = 574
+    Caption = 'ダウンロードするWeb小説トップページ&URL(URLをクリップボードにコピーまたはWebブラウザのアドレスバーからドラッグ＆ドロップ)'
+    FocusControl = URLList
+  end
+  object AddResult: TLabel
+    Left = 13
+    Height = 1
+    Top = 272
+    Width = 1
+  end
+  object SaveFolder: TEditButton
+    Left = 85
+    Height = 23
+    Top = 294
+    Width = 544
+    ButtonCaption = '・・・'
+    ButtonWidth = 23
+    MaxLength = 0
+    NumGlyphs = 1
+    OnButtonClick = SaveFolderButtonClick
+    PasswordChar = #0
+    TabOrder = 1
+  end
+  object Label2: TLabel
+    Left = 13
+    Height = 15
+    Top = 298
+    Width = 71
+    Caption = '保存フォルダ：'
+  end
+  object Panel1: TPanel
+    Left = 12
+    Height = 56
+    Top = 326
+    Width = 618
+    BevelInner = bvRaised
+    BevelOuter = bvLowered
+    ClientHeight = 56
+    ClientWidth = 618
+    TabOrder = 2
+    object NvTitle: TLabel
+      Left = 8
+      Height = 15
+      Top = 8
+      Width = 600
+      AutoSize = False
+      Caption = 'タイトル：'
+    end
+    object Label4: TLabel
+      Left = 116
+      Height = 15
+      Top = 30
+      Width = 50
+      Caption = 'DL進捗：'
+    end
+    object PrgrsBar: TProgressBar
+      Left = 172
+      Height = 18
+      Top = 28
+      Width = 364
+      TabOrder = 0
+    end
+    object Prgrs: TLabel
+      Left = 580
+      Height = 15
+      Top = 30
+      Width = 25
+      Alignment = taRightJustify
+      Anchors = [akTop, akRight]
+      Caption = '[0/0]'
+    end
+    object NvSite: TLabel
+      Left = 8
+      Height = 1
+      Top = 30
+      Width = 1
+    end
+  end
+  object ExecBtn: TButton
+    Left = 552
+    Height = 25
+    Top = 388
+    Width = 75
+    Caption = '実行(&O)'
+    Enabled = False
+    TabOrder = 3
+    OnClick = ExecBtnClick
+  end
+  object AbortBtn: TButton
+    Left = 464
+    Height = 25
+    Top = 388
+    Width = 75
+    Caption = '中止(&A)'
+    Enabled = False
+    TabOrder = 4
+    OnClick = AbortBtnClick
+  end
+  object OpenBtn: TSpeedButton
+    Left = 576
+    Height = 22
+    Top = 266
+    Width = 23
+    Caption = ''
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Segoe MDL2 Assets'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = OpenBtnClick
+    ParentFont = False
+  end
+  object SaveBtn: TSpeedButton
+    Left = 604
+    Height = 22
+    Top = 266
+    Width = 23
+    Caption = ''
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Segoe MDL2 Assets'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    OnClick = SaveBtnClick
+    ParentFont = False
+  end
+  object DropURLTarget1: TDropURLTarget
+    DragTypes = [dtCopy, dtLink]
+    GetDataOnEnter = True
+    OnDrop = DropURLTarget1Drop
+    Target = URLList
+    Left = 88
+    Top = 204
+  end
+  object FD: TSelectDirectoryDialog
+    Title = '保存フォルダの選択'
+    Left = 172
+    Top = 203
+  end
+  object OD: TOpenDialog
+    Title = 'URLリストファイルを開く'
+    DefaultExt = '.txt'
+    FileName = 'DLList.txt'
+    Filter = 'テキストファイル(*.txt)|*.txt|全てのファイル(*.*)|*.*'
+    Left = 232
+    Top = 203
+  end
+  object SD: TSaveDialog
+    Title = 'URLリストに名前を付けて保存'
+    DefaultExt = '.txt'
+    FileName = 'DLList.txt'
+    Filter = 'テキストファイル(*.txt)|*.txt|全てのファイル(*.*)|*.*'
+    Left = 294
+    Top = 201
+  end
+end
