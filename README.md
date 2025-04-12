@@ -8,7 +8,7 @@ Extdl_GUIではシンプルなインターフェイスで都度ダウンロー�
 Extdl_GUI2.exeをNaro2mobi用外部ダウンローダーと同じフォルダ内にコピーして下さい。尚、外部ダウンローダーを認識するために定義ファイルであるExtDLoade.txtも必要です。
 
 Extdl_GUI2.exeを起動すると、最初に使用できる外部ダウンローダーの一覧が表示されます。
-![extdlgui1](https://github.com/user-attachments/assets/0557d2fe-3492-4e3e-ab04-d560c83ad187)
+![extdl_gui2](https://github.com/user-attachments/assets/d7736d8a-7b8d-47ee-a5ad-d1dc3b9420f9)
 
 ダウンロードしたい作品のトップページURLをクリップボードにコピーするか、Webブラウザのアドレスバーからリストボックス部分にドラッグ＆ドロップします。クリップボードへコピーするURLは複数行に渡っていればそれらを一括で登録します。
 
