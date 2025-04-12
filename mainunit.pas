@@ -5,8 +5,10 @@
     TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
-  ver1.0  2025/04/09  単純なGUIから実用的なランチャー型に作り変えた
-                      開発環境をLazarusに変更した
+    1.1 2025/04/12  プレーンテキストで保存するオプションを追加した
+                    URLリストの削除メニューを追加した
+    1.0 2025/04/09  単純なGUIから実用的なランチャー型に作り変えた
+                    開発環境をLazarusに変更した
 
 }
 unit MainUnit;
@@ -19,7 +21,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Clipbrd, Controls,
-  Forms, Dialogs, StdCtrls, EditBtn, ExtCtrls, ComCtrls, Buttons,
+  Forms, Dialogs, StdCtrls, EditBtn, ExtCtrls, ComCtrls, Buttons, Menus,
   DragDropInternet, LazUTF8, RegExpr, Types, IniFiles, ShellAPI;
 
 type
@@ -35,11 +37,14 @@ type
     end;
   {$ENDIF}
   TMainForm = class(TForm)
+    AsPlaneText: TCheckBox;
     ExecBtn: TButton;
     AbortBtn: TButton;
     DropURLTarget1: TDropURLTarget;
+    DelItem: TMenuItem;
     NvSite: TLabel;
     OD: TOpenDialog;
+    PM: TPopupMenu;
     Prgrs: TLabel;
     NvTitle: TLabel;
     Label4: TLabel;
@@ -55,15 +60,18 @@ type
     SaveBtn: TSpeedButton;
     URLList: TListBox;
     procedure AbortBtnClick(Sender: TObject);
+    procedure DelItemClick(Sender: TObject);
     procedure DropURLTarget1Drop(Sender: TObject; ShiftState: TShiftState;
       APoint: TPoint; var Effect: Longint);
     procedure ExecBtnClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure PMPopup(Sender: TObject);
     procedure SaveBtnClick(Sender: TObject);
     procedure SaveFolderButtonClick(Sender: TObject);
     procedure OpenBtnClick(Sender: TObject);
+    procedure URLListSelectionChange(Sender: TObject; User: boolean);
   private
     FNextClipboardOwner: HWnd;
     ExtDLDat: array[0..64, 0..4] of string;
@@ -82,6 +90,7 @@ type
     function LoadExtDLoader(FileName: string): Boolean;
     function IsExtDLoader(URL: string): string;
     function Download(URL: string): boolean;
+    function GetPlaneText(SrcText: string): string;
   public
 
   protected
@@ -121,6 +130,20 @@ begin
   path := ReplaceRegExpr('[\\/:;\*\?\+,."<>|\.\t ]', path, '-');
 
   Result := path;
+end;
+
+// 青空文庫形式テキストからテキストだけを抜き出す
+function TMainForm.GetPlaneText(SrcText: string): string;
+var
+  tmp: string;
+begin
+  tmp := ReplaceRegExpr('［＃.*?］', SrcText, '');
+  tmp := ReplaceRegExpr('［＃.*?（', tmp, '');
+  tmp := ReplaceRegExpr('）.*?］', tmp, '');
+  tmp := StringReplace(tmp, '｜', '', [rfReplaceAll]);
+  tmp := StringReplace(tmp, '《', '（', [rfReplaceAll]);
+  tmp := StringReplace(tmp, '》', '）', [rfReplaceAll]);
+  Result := tmp;
 end;
 
 // Delphiではprocedure xxx(var Message WMxxx); message WM_XXXX;と宣言することで
@@ -200,6 +223,7 @@ begin
     SaveFolder.Text := ini.ReadString('Options', 'SaveFolder', ExtractFileDir(fn));
     Left := ini.ReadInteger('options', 'WindowsLeft', Left);
     Top  := ini.ReadInteger('options', 'WindowsTop', Top);
+    AsPlaneText.Checked := ini.ReadBool('options', 'AsPlaneText', False);
   finally
     ini.Free;
   end;
@@ -218,6 +242,11 @@ end;
 procedure TMainForm.AbortBtnClick(Sender: TObject);
 begin
   AbortFlag := True;
+end;
+
+procedure TMainForm.DelItemClick(Sender: TObject);
+begin
+  URLList.Items.Delete(URLList.ItemIndex);
 end;
 
 // URLから対応する外部ダウンローダーを返す
@@ -241,6 +270,7 @@ end;
 function TMainForm.Download(URL: string): boolean;
 var
   cmd, hstr, cdir, enam, fnam, lnam: string;
+  sl: TStringList;
   SXInfo: TShellExecuteInfo;
   ret: cardinal;
 begin
@@ -295,6 +325,18 @@ begin
 	  NvTitle.Caption := 'エラー：ダウンロードに失敗しました.'
   else begin
 	  NvTitle.Caption := 'ダウンロードしました.';
+    // プレーンテキスト化
+    if AsPlaneText.Checked then
+    begin
+      sl := TStringList.Create;
+      try
+        sl.LoadFromFile(fnam, TEncoding.UTF8);
+        sl.Text := GetPlaneText(sl.Text);
+        sl.SaveToFile(fnam, TEncoding.UTF8);
+      finally
+        sl.Free;
+      end;
+    end;
     // ダウンロードしたテキストファイルを保存フォルダにタイトル名でコピーする
     // 保存ファイル名はそのままだと文字化けするので文字コードをAnsiに変換する
     CopyFile(PChar(fnam), PChar(UTF8ToWinCP(TextName)), False);
@@ -348,6 +390,7 @@ begin
     ini.WriteString('Options', 'SaveFolder', SaveFolder.Text);
     ini.WriteInteger('options', 'WindowsLeft', Left);
     ini.WriteInteger('options', 'WindowsTop', Top);
+    ini.WriteBool('options', 'AsPlaneText', AsPlaneText.Checked);
   finally
     ini.Free;
   end;
@@ -356,6 +399,11 @@ end;
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   ChangeClipboardChain(Handle, FNextClipboardOwner);
+end;
+
+procedure TMainForm.PMPopup(Sender: TObject);
+begin
+  DelItem.Enabled := URLList.SelCount > 0;
 end;
 
 procedure TMainForm.SaveBtnClick(Sender: TObject);
@@ -391,6 +439,11 @@ begin
       sl.Free;
     end;
   end;
+end;
+
+procedure TMainForm.URLListSelectionChange(Sender: TObject; User: boolean);
+begin
+  SaveBtn.Enabled := URLList.Count > 0;
 end;
 
 // https://wiki.lazarus.freepascal.org/Clipboard

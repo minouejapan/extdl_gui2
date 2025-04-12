@@ -5,7 +5,7 @@ object MainForm: TMainForm
   Width = 640
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
-  Caption = 'ExtDL_GUI2'
+  Caption = 'ExtDL_GUI2 ver1.1'
   ClientHeight = 422
   ClientWidth = 640
   OnClose = FormClose
@@ -17,7 +17,9 @@ object MainForm: TMainForm
     Top = 28
     Width = 616
     ItemHeight = 0
+    PopupMenu = PM
     TabOrder = 0
+    OnSelectionChange = URLListSelectionChange
   end
   object Label1: TLabel
     Left = 13
@@ -34,10 +36,10 @@ object MainForm: TMainForm
     Width = 1
   end
   object SaveFolder: TEditButton
-    Left = 85
+    Left = 105
     Height = 23
     Top = 294
-    Width = 544
+    Width = 524
     ButtonCaption = '・・・'
     ButtonWidth = 23
     MaxLength = 0
@@ -50,8 +52,9 @@ object MainForm: TMainForm
     Left = 13
     Height = 15
     Top = 298
-    Width = 71
-    Caption = '保存フォルダ：'
+    Width = 85
+    Caption = '保存フォルダ(&F)：'
+    FocusControl = SaveFolder
   end
   object Panel1: TPanel
     Left = 12
@@ -141,6 +144,7 @@ object MainForm: TMainForm
     Top = 266
     Width = 23
     Caption = ''
+    Enabled = False
     Font.CharSet = ANSI_CHARSET
     Font.Height = -16
     Font.Name = 'Segoe MDL2 Assets'
@@ -148,6 +152,14 @@ object MainForm: TMainForm
     Font.Quality = fqDraft
     OnClick = SaveBtnClick
     ParentFont = False
+  end
+  object AsPlaneText: TCheckBox
+    Left = 19
+    Height = 19
+    Top = 392
+    Width = 156
+    Caption = 'プレーンテキストで保存する(&P)'
+    TabOrder = 5
   end
   object DropURLTarget1: TDropURLTarget
     DragTypes = [dtCopy, dtLink]
@@ -177,5 +189,15 @@ object MainForm: TMainForm
     Filter = 'テキストファイル(*.txt)|*.txt|全てのファイル(*.*)|*.*'
     Left = 294
     Top = 201
+  end
+  object PM: TPopupMenu
+    OnPopup = PMPopup
+    Left = 144
+    Top = 81
+    object DelItem: TMenuItem
+      Caption = '削除(&D)'
+      ShortCut = 46
+      OnClick = DelItemClick
+    end
   end
 end
