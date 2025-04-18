@@ -36,8 +36,7 @@ scriptフォルダ内のサンプルについて
 　　　　　　　また合わせて［＃リンクの図（xxxx）入る］を［＃挿絵001（001.jpg）入る］のように置換したファイルを出力します
 
 あとは「実行」ボタンを押せばURLリストに従って連続でダウンロードします。
-![extdl4](https://github.com/user-attachments/assets/d86d0031-f822-4c05-9e37-d9da34450c4b)
-
+![extdl4](https://github.com/user-attachments/assets/11a321fd-3966-4351-ad59-745e8f6c0415)
 
 
 ## ビルド方法
