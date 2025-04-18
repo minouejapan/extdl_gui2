@@ -5,6 +5,8 @@
     TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.2 2025/04/18  ダウンロード後にPython/Ruby\Perlスクリプトを実行する機能を追加した
+                    上記に合わせてプレーンテキストで保存するオプションを廃止した
     1.1 2025/04/12  プレーンテキストで保存するオプションを追加した
                     URLリストの削除メニューを追加した
     1.0 2025/04/09  単純なGUIから実用的なランチャー型に作り変えた
@@ -37,11 +39,15 @@ type
     end;
   {$ENDIF}
   TMainForm = class(TForm)
-    AsPlaneText: TCheckBox;
+    OD2: TOpenDialog;
+    PyStat: TLabel;
+    PyScript: TEditButton;
+    PyCommand: TComboBox;
     ExecBtn: TButton;
     AbortBtn: TButton;
     DropURLTarget1: TDropURLTarget;
     DelItem: TMenuItem;
+    Label3: TLabel;
     NvSite: TLabel;
     OD: TOpenDialog;
     PM: TPopupMenu;
@@ -58,6 +64,7 @@ type
     FD: TSelectDirectoryDialog;
     OpenBtn: TSpeedButton;
     SaveBtn: TSpeedButton;
+    OptBtn: TSpeedButton;
     URLList: TListBox;
     procedure AbortBtnClick(Sender: TObject);
     procedure DelItemClick(Sender: TObject);
@@ -67,7 +74,9 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure OptBtnClick(Sender: TObject);
     procedure PMPopup(Sender: TObject);
+    procedure PyScriptButtonClick(Sender: TObject);
     procedure SaveBtnClick(Sender: TObject);
     procedure SaveFolderButtonClick(Sender: TObject);
     procedure OpenBtnClick(Sender: TObject);
@@ -90,7 +99,7 @@ type
     function LoadExtDLoader(FileName: string): Boolean;
     function IsExtDLoader(URL: string): string;
     function Download(URL: string): boolean;
-    function GetPlaneText(SrcText: string): string;
+    function ExecPython(TextName: string): boolean;
   public
 
   protected
@@ -130,20 +139,6 @@ begin
   path := ReplaceRegExpr('[\\/:;\*\?\+,."<>|\.\t ]', path, '-');
 
   Result := path;
-end;
-
-// 青空文庫形式テキストからテキストだけを抜き出す
-function TMainForm.GetPlaneText(SrcText: string): string;
-var
-  tmp: string;
-begin
-  tmp := ReplaceRegExpr('［＃.*?］', SrcText, '');
-  tmp := ReplaceRegExpr('［＃.*?（', tmp, '');
-  tmp := ReplaceRegExpr('）.*?］', tmp, '');
-  tmp := StringReplace(tmp, '｜', '', [rfReplaceAll]);
-  tmp := StringReplace(tmp, '《', '（', [rfReplaceAll]);
-  tmp := StringReplace(tmp, '》', '）', [rfReplaceAll]);
-  Result := tmp;
 end;
 
 // Delphiではprocedure xxx(var Message WMxxx); message WM_XXXX;と宣言することで
@@ -221,9 +216,10 @@ begin
   ini := TIniFile.Create(fn);
   try
     SaveFolder.Text := ini.ReadString('Options', 'SaveFolder', ExtractFileDir(fn));
+    PyCommand.ItemIndex := ini.ReadInteger('options', 'pycommand', 0);
+    PyScript.Text := ini.ReadString('options', 'PyScript', '');
     Left := ini.ReadInteger('options', 'WindowsLeft', Left);
     Top  := ini.ReadInteger('options', 'WindowsTop', Top);
-    AsPlaneText.Checked := ini.ReadBool('options', 'AsPlaneText', False);
   finally
     ini.Free;
   end;
@@ -263,6 +259,62 @@ begin
       Result := ExtDLDat[i][2];
       Break;
     end;
+  end;
+end;
+
+// TextNameで指定されたテキストファイルにPythonスクリプトを実行する
+function TMainForm.ExecPython(TextName: string): boolean;
+var
+	SI: TStartupInfo;
+  SXInfo: TShellExecuteInfo;
+  prg: array[0..3] of string = ('｜', '／', '―', '＼');
+  pycmd: string;
+  n: integer;
+  Ret: ULONG;
+begin
+  case PyCommand.ItemIndex of
+    1: pycmd := 'py';
+    2: pycmd := 'python';
+    3: pycmd := 'python3';
+    4: pycmd := 'ruby';
+    5: pycmd := 'perl';
+  end;
+  FillChar(SI, SizeOf(SI), #0);
+  SI.cb          := SizeOf(TStartupInfo);
+  SI.dwFlags     := STARTF_USESHOWWINDOW;
+  SI.wShowWindow := SW_HIDE;
+
+  with SXInfo do//TShellExecuteInfo構造体の初期化
+  begin
+    cbSize := SizeOf(SXInfo);
+    fMask := SEE_MASK_NOCLOSEPROCESS;//これがないと終了待ち出来ない
+    Wnd := Application.Handle;
+    lpVerb := 'open';
+    lpFile := PChar(pycmd);
+    lpParameters := PChar(UTF8ToWinCP('"' + PyScript.Text + '" "' + ExtractFileName(TextName) + '"'));
+    lpDirectory := PChar(UTF8ToWinCP(SaveFolder.Text));
+    nShow := SW_HIDE;
+  end;
+
+  if not ShellExecuteEx(LPSHELLEXECUTEINFOA(@SXInfo)) then   // 起動失敗
+  begin
+    Result := False;
+  end else begin
+    //起動したアプリケーションの終了待ち
+    n := 0;
+    while WaitForSingleObject(SXInfo.hProcess, 0) = WAIT_TIMEOUT do
+    begin
+      Application.ProcessMessages;
+      Sleep(200);
+      PyStat.Caption := '実行中...' + prg[n];
+      Inc(n);
+      if n = 4  then
+        n := 0;
+      if AbortFlag then
+        TerminateProcess(SXInfo.hProcess, Ret);
+    end;
+    PyStat.Caption := '';
+    Result := True;
   end;
 end;
 
@@ -325,30 +377,27 @@ begin
 	  NvTitle.Caption := 'エラー：ダウンロードに失敗しました.'
   else begin
 	  NvTitle.Caption := 'ダウンロードしました.';
-    // プレーンテキスト化
-    if AsPlaneText.Checked then
-    begin
-      sl := TStringList.Create;
-      try
-        sl.LoadFromFile(fnam, TEncoding.UTF8);
-        sl.Text := GetPlaneText(sl.Text);
-        sl.SaveToFile(fnam, TEncoding.UTF8);
-      finally
-        sl.Free;
-      end;
-    end;
     // ダウンロードしたテキストファイルを保存フォルダにタイトル名でコピーする
     // 保存ファイル名はそのままだと文字化けするので文字コードをAnsiに変換する
     CopyFile(PChar(fnam), PChar(UTF8ToWinCP(TextName)), False);
     CopyFile(PChar(lnam), PChar(UTF8ToWinCP(LogName)), False);
-    if FileExists(TextName) then
-      DeleteFile(fnam)
-    else
-      NvTitle.Caption := 'エラー：ダウンロードテキストの保存に失敗しました.';
     // コピー出来たなら元のファイルを削除する
     if FileExists(LogName) then
       DeleteFile(lnam)
     else
+      NvTitle.Caption := 'エラー：ダウンロードテキストの保存に失敗しました.';
+    if FileExists(TextName) then
+    begin
+      DeleteFile(fnam);
+      if PyCommand.ItemIndex > 0 then
+      begin
+        if FileExists(PyScript.Text) then
+          if ExecPython(TextName) then
+            NvTitle.Caption := 'Pythonスクリプトでダウンロードファイルを処理しました.'
+          else
+            NvTitle.Caption := 'Pythonスクリプトの実行に失敗しました.';
+      end;
+    end else
       NvTitle.Caption := 'エラー：ダウンロードテキストの保存に失敗しました.';
     Result := True;
   end;
@@ -388,9 +437,10 @@ begin
   ini := TIniFile.Create(fn);
   try
     ini.WriteString('Options', 'SaveFolder', SaveFolder.Text);
+    ini.WriteInteger('options', 'pycommand', PyCommand.ItemIndex);
+    ini.WriteString('options', 'PyScript', PyScript.Text);
     ini.WriteInteger('options', 'WindowsLeft', Left);
     ini.WriteInteger('options', 'WindowsTop', Top);
-    ini.WriteBool('options', 'AsPlaneText', AsPlaneText.Checked);
   finally
     ini.Free;
   end;
@@ -401,9 +451,29 @@ begin
   ChangeClipboardChain(Handle, FNextClipboardOwner);
 end;
 
+procedure TMainForm.OptBtnClick(Sender: TObject);
+begin
+  if Height = 390 then
+  begin
+    Height := 470;
+    OptBtn.Caption := '▲ オプション';
+  end else begin
+    Height := 390;
+    OptBtn.Caption := '▼ オプション';
+  end;
+end;
+
 procedure TMainForm.PMPopup(Sender: TObject);
 begin
   DelItem.Enabled := URLList.SelCount > 0;
+end;
+
+procedure TMainForm.PyScriptButtonClick(Sender: TObject);
+begin
+  if FileExists(PyScript.Text) then
+    OD2.FileName := PyScript.Text;
+  if OD2.Execute then
+    PyScript.Text := OD2.FileName;
 end;
 
 procedure TMainForm.SaveBtnClick(Sender: TObject);
@@ -463,7 +533,6 @@ function TMainForm.WMDrawClipboard(AwParam: WParam; AlParam: LParam): LRESULT;
 begin
   if Clipboard.HasFormat(CF_TEXT) Then
   Begin
-    SetForegroundWindow(Handle);
     AddItems(Clipboard.AsText);
   end;
   SendMessage(FNextClipboardOwner, WM_DRAWCLIPBOARD, 0, 0);
@@ -513,6 +582,7 @@ begin
     end;
     URLList.Items.Add(URL);
     AddResult.Caption := 'URLを追加しました(' + IntToStr(URLList.Items.Count) + ')';
+    SetForegroundWindow(Handle);
     if not ExecFlag then
       ExecBtn.Enabled := True;
   end;
