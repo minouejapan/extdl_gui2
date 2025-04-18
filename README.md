@@ -8,19 +8,25 @@ Extdl_GUIではシンプルなインターフェイスで都度ダウンロー�
 Extdl_GUI2.exeをNaro2mobi用外部ダウンローダーと同じフォルダ内にコピーして下さい。尚、外部ダウンローダーを認識するために定義ファイルであるExtDLoade.txtも必要です。
 
 Extdl_GUI2.exeを起動すると、最初に使用できる外部ダウンローダーの一覧が表示されます。
-![extdl_gui2](https://github.com/user-attachments/assets/d7736d8a-7b8d-47ee-a5ad-d1dc3b9420f9)
+![exdl1](https://github.com/user-attachments/assets/64ea17c2-4daf-4f61-903f-4133756d0cd7)
 
 ダウンロードしたい作品のトップページURLをクリップボードにコピーするか、Webブラウザのアドレスバーからリストボックス部分にドラッグ＆ドロップします。クリップボードへコピーするURLは複数行に渡っていればそれらを一括で登録します。
 
 また、リストボックス右下のある「開く」「保存」ボタンで、ファイルからURLリストを読み込んだり、ファイルに保存したりできます。
 
-保存フォルダを指定したい場合は、保存フォルダ右側の「･･･」ボタンを押して指定します。
-![extdlgui2](https://github.com/user-attachments/assets/1167f2c4-bbf6-40d7-85d6-e9b22381b29b)
+保存フォルダを指定したい場合は、[▼ オプション]ボタンを押して保存フォルダ右側の「･･･」ボタンを押して指定します。
+![extdl2](https://github.com/user-attachments/assets/91f5766f-121e-4497-8328-9ae49f6a9f2d)
+また、Pythonコンボボックスからpy/python/python3/ruby/perlのいずれかを選択することで、ダウンロードしたテキストファイルを指定したスクリプトで処理することも出来ます。スクリプトを実行しない場合はPythonコンボボックスから「実行しない」を選択してください。
+実行できるスクリプトは
+py/pytho/pytho3・・・Pytheoスクリプト
+ruby・・・rubyスクリプト
+perl・・・perlスクリプト
+です。
+尚、これらのスクリプトを実行するためには、それぞれの実行環境のインストールが必要です。
 
 あとは「実行」ボタンを押せばURLリストに従って連続でダウンロードします。
-![extdlgui3](https://github.com/user-attachments/assets/0bb7017c-194d-40af-b658-f4d7998ba815)
+![extdl4](https://github.com/user-attachments/assets/d86d0031-f822-4c05-9e37-d9da34450c4b)
 
-※「プレーンテキストで保存する」を有効にすると、ダウンロードしたテキストファイルから青空文庫タグを取り除いた状態で保存します。
 
 
 ## ビルド方法
