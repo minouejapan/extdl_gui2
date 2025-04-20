@@ -1,4 +1,5 @@
 #
+#
 # Naro2mobi外部ダウンローダーでダウンロードした青空文庫形式準拠テキストを
 # プレーンテキストに変換する
 #
@@ -25,15 +26,24 @@ def main():
         print('  python ptext.py 青空文庫形式準拠テキストファイル名')
         quit()
 
-    fin = open(sys.argv[1], 'r', encoding='UTF-8')
-    atext = fin.read()
-    fin.close()
-
+    infile = sys.argv[1]
+    print(infile + '->')
+    try:
+        fin = open(infile, 'r', encoding='UTF-8')
+        atext = fin.read()
+        fin.close()
+    except:
+        print('ファイル読み込みエラー.')
+        quit()
     ptext = eliminate_tags(atext)
-
-    fout = open(sys.argv[1] + '.txt', 'w', encoding='UTF-8')
-    fout.write(ptext)
-    fout.close()
+    try:
+        fout = open(infile + '.txt', 'w', encoding='UTF-8')
+        fout.write(ptext)
+        fout.close()
+    except:
+        print('ファイル書き込みエラー.')
+        quit()
+    print(infile + '.txt として保存しました.')
 
 if __name__ == '__main__':
     main()
