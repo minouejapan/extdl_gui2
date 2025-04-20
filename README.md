@@ -38,6 +38,9 @@ scriptフォルダ内のサンプルについて
 あとは「実行」ボタンを押せばURLリストに従って連続でダウンロードします。
 ![extdl4](https://github.com/user-attachments/assets/11a321fd-3966-4351-ad59-745e8f6c0415)
 
+ver1.3からスクリプトの実行結果を確認出来るようになりました(スクリプトのSTDOUTへの出力を表示します)。
+![extdl=gui2-5](https://github.com/user-attachments/assets/cbc7b50f-b644-4292-a131-8873ec34bb7c)
+
 
 ## ビルド方法
 Lazarus 3.2以降でプロジェクトファイルextdl_gui2.lpiを開いてビルドして下さい。尚、ビルドするためには以下の追加ライブラリが必要です。
