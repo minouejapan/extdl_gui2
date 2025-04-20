@@ -5,10 +5,11 @@ object MainForm: TMainForm
   Width = 640
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'ExtDL_GUI2 ver1.2'
+  Caption = 'ExtDL_GUI2 ver1.3'
   ClientHeight = 390
   ClientWidth = 640
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   object URLList: TListBox
@@ -36,10 +37,10 @@ object MainForm: TMainForm
     Width = 1
   end
   object SaveFolder: TEditButton
-    Left = 152
+    Left = 180
     Height = 23
     Top = 400
-    Width = 478
+    Width = 446
     ButtonCaption = '・・・'
     ButtonWidth = 23
     MaxLength = 0
@@ -49,7 +50,7 @@ object MainForm: TMainForm
     TabOrder = 1
   end
   object Label2: TLabel
-    Left = 12
+    Left = 87
     Height = 15
     Top = 404
     Width = 85
@@ -156,18 +157,18 @@ object MainForm: TMainForm
     ParentFont = False
   end
   object Label3: TLabel
-    Left = 13
+    Left = 29
     Height = 15
     Top = 436
-    Width = 38
-    Caption = '&Python'
+    Width = 36
+    Caption = '&Script :'
     FocusControl = PyCommand
   end
   object PyCommand: TComboBox
-    Left = 56
+    Left = 76
     Height = 23
     Top = 432
-    Width = 88
+    Width = 96
     ItemHeight = 15
     ItemIndex = 0
     Items.Strings = (
@@ -183,10 +184,10 @@ object MainForm: TMainForm
     Text = '実行しない'
   end
   object PyScript: TEditButton
-    Left = 152
+    Left = 180
     Height = 23
     Top = 432
-    Width = 478
+    Width = 446
     ButtonCaption = '・・・'
     ButtonWidth = 23
     MaxLength = 0
@@ -196,9 +197,9 @@ object MainForm: TMainForm
     TabOrder = 6
   end
   object PyStat: TLabel
-    Left = 375
+    Left = 116
     Height = 1
-    Top = 393
+    Top = 364
     Width = 1
   end
   object OptBtn: TSpeedButton
@@ -209,6 +210,47 @@ object MainForm: TMainForm
     Caption = '▼ オプション'
     Flat = True
     OnClick = OptBtnClick
+  end
+  object CmdLog: TMemo
+    Left = 28
+    Height = 76
+    Top = 390
+    Width = 600
+    Color = 2565927
+    Font.CharSet = SHIFTJIS_CHARSET
+    Font.Color = clLime
+    Font.Height = -12
+    Font.Name = 'ＭＳ ゴシック'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    ParentFont = False
+    ScrollBars = ssVertical
+    TabOrder = 7
+    Visible = False
+  end
+  object CmdLogBtn: TSpeedButton
+    Left = 3
+    Height = 22
+    Top = 400
+    Width = 23
+    AllowAllUp = True
+    Caption = ''
+    Flat = True
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -16
+    Font.Name = 'Segoe MDL2 Assets'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    GroupIndex = 1
+    OnClick = CmdLogBtnClick
+    ParentFont = False
+  end
+  object Label5: TLabel
+    Left = 28
+    Height = 15
+    Top = 404
+    Width = 41
+    Caption = 'LigView'
   end
   object DropURLTarget1: TDropURLTarget
     DragTypes = [dtCopy, dtLink]

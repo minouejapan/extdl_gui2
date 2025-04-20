@@ -5,7 +5,9 @@
     TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
-    1.2 2025/04/18  ダウンロード後にPython/Ruby\Perlスクリプトを実行する機能を追加した
+    1.3 2025/04/21  外部実行ファイルの起動をShellExecuteExからRunCommandIndir(Lazarus依存)に
+                    変更してスクリプトの実行結果(コンソール出力)を表示するようにした
+    1.2 2025/04/18  ダウンロード後にPython/Ruby/Perlスクリプトを実行する機能を追加した
                     上記に合わせてプレーンテキストで保存するオプションを廃止した
     1.1 2025/04/12  プレーンテキストで保存するオプションを追加した
                     URLリストの削除メニューを追加した
@@ -24,7 +26,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Clipbrd, Controls,
   Forms, Dialogs, StdCtrls, EditBtn, ExtCtrls, ComCtrls, Buttons, Menus,
-  DragDropInternet, LazUTF8, RegExpr, Types, IniFiles, ShellAPI;
+  DragDropInternet, LazUTF8, RegExpr, Types, IniFiles, ShellAPI, Process;
 
 type
 
@@ -39,6 +41,8 @@ type
     end;
   {$ENDIF}
   TMainForm = class(TForm)
+    CmdLog: TMemo;
+    Label5: TLabel;
     OD2: TOpenDialog;
     PyStat: TLabel;
     PyScript: TEditButton;
@@ -65,13 +69,16 @@ type
     OpenBtn: TSpeedButton;
     SaveBtn: TSpeedButton;
     OptBtn: TSpeedButton;
+    CmdLogBtn: TSpeedButton;
     URLList: TListBox;
     procedure AbortBtnClick(Sender: TObject);
+    procedure CmdLogBtnClick(Sender: TObject);
     procedure DelItemClick(Sender: TObject);
     procedure DropURLTarget1Drop(Sender: TObject; ShiftState: TShiftState;
       APoint: TPoint; var Effect: Longint);
     procedure ExecBtnClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure OptBtnClick(Sender: TObject);
@@ -240,6 +247,13 @@ begin
   AbortFlag := True;
 end;
 
+procedure TMainForm.CmdLogBtnClick(Sender: TObject);
+begin
+  inherited;
+
+  CmdLog.Visible := CmdLogBtn.Down;
+end;
+
 procedure TMainForm.DelItemClick(Sender: TObject);
 begin
   URLList.Items.Delete(URLList.ItemIndex);
@@ -265,12 +279,8 @@ end;
 // TextNameで指定されたテキストファイルにPythonスクリプトを実行する
 function TMainForm.ExecPython(TextName: string): boolean;
 var
-	SI: TStartupInfo;
-  SXInfo: TShellExecuteInfo;
-  prg: array[0..3] of string = ('｜', '／', '―', '＼');
-  pycmd: string;
+  pycmd, cmdline, output: string;
   n: integer;
-  Ret: ULONG;
 begin
   case PyCommand.ItemIndex of
     1: pycmd := 'py';
@@ -279,43 +289,23 @@ begin
     4: pycmd := 'ruby';
     5: pycmd := 'perl';
   end;
-  FillChar(SI, SizeOf(SI), #0);
-  SI.cb          := SizeOf(TStartupInfo);
-  SI.dwFlags     := STARTF_USESHOWWINDOW;
-  SI.wShowWindow := SW_HIDE;
-
-  with SXInfo do//TShellExecuteInfo構造体の初期化
-  begin
-    cbSize := SizeOf(SXInfo);
-    fMask := SEE_MASK_NOCLOSEPROCESS;//これがないと終了待ち出来ない
-    Wnd := Application.Handle;
-    lpVerb := 'open';
-    lpFile := PChar(pycmd);
-    lpParameters := PChar(UTF8ToWinCP('"' + PyScript.Text + '" "' + ExtractFileName(TextName) + '"'));
-    lpDirectory := PChar(UTF8ToWinCP(SaveFolder.Text));
-    nShow := SW_HIDE;
-  end;
-
-  if not ShellExecuteEx(LPSHELLEXECUTEINFOA(@SXInfo)) then   // 起動失敗
-  begin
-    Result := False;
-  end else begin
-    //起動したアプリケーションの終了待ち
-    n := 0;
-    while WaitForSingleObject(SXInfo.hProcess, 0) = WAIT_TIMEOUT do
-    begin
-      Application.ProcessMessages;
-      Sleep(200);
-      PyStat.Caption := '実行中...' + prg[n];
-      Inc(n);
-      if n = 4  then
-        n := 0;
-      if AbortFlag then
-        TerminateProcess(SXInfo.hProcess, Ret);
-    end;
-    PyStat.Caption := '';
-    Result := True;
-  end;
+  if Height = 390 then
+    Height := 470;
+  CmdLog.Visible := True;
+  CmdLogBtn.Down := True;
+  PyStat.Caption := 'Scriptを実行中...';
+  Application.ProcessMessages;
+  cmdline := '> ' + pycmd + ' "' + PyScript.Text + '" "' + TextName + '"';
+  CmdLog.Lines.Add(cmdline);
+  // Lazarusに依存
+  Result := RunCommandIndir(SaveFolder.Text, pycmd, ['"' + PyScript.Text + '"', '"' + TextName + '"'],
+                            output, [poWaitOnExit], swoHide);
+  CmdLog.Text := CmdLog.Text + #13#10 + WinCPToUTF8(output);
+  CmdLog.VertScrollBar.Position := 1000000; // 強引な強制スクロール処理
+  if Result then
+    PyStat.Caption := 'スクリプトを実行しました.'
+  else
+    PyStat.Caption := 'スクリプトの実行に失敗しました.';
 end;
 
 // 外部ダウンローダーを起動させる
@@ -392,7 +382,7 @@ begin
       if PyCommand.ItemIndex > 0 then
       begin
         if FileExists(PyScript.Text) then
-          if ExecPython(TextName) then
+          if ExecPython(ExtractFileName(TextName)) then
             NvTitle.Caption := 'Pythonスクリプトでダウンロードファイルを処理しました.'
           else
             NvTitle.Caption := 'Pythonスクリプトの実行に失敗しました.';
@@ -412,6 +402,7 @@ begin
   ExecFlag  := True;
   ExecBtn.Enabled  := False;
   AbortBtn.Enabled := True;
+  PyStat.Caption := '';
   cnt := URLList.Items.Count;
   for i := 1 to cnt do
   begin
@@ -446,6 +437,13 @@ begin
   end;
 end;
 
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  // 実行中は終了させない
+  if ExecFlag then
+    CanClose := False;
+end;
+
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   ChangeClipboardChain(Handle, FNextClipboardOwner);
@@ -460,6 +458,8 @@ begin
   end else begin
     Height := 390;
     OptBtn.Caption := '▼ オプション';
+    CmdLog.Visible := False;
+    CmdLogBtn.Down := False;
   end;
 end;
 
