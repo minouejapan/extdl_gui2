@@ -78,7 +78,7 @@ def url_to_pic(atxtfile: str):
             url = re.sub('［＃リンクの図（', '', purl.group(0))
             url = re.sub('）入る］', '', url)
             sys.stdout.write('\r' + str(pic_n) + ' 個の挿絵画像をダウンロードしました.')
-            pnum = '{:03}'.format(pic_n)
+            pnum = '{:04}'.format(pic_n)
             pic_n += 1
             pfile = get_pic(url, fdn + '\\' + pnum)
             if pfile != '':
