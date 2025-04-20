@@ -3,6 +3,8 @@
 # に含まれる［リンクの図］をダウンロードしてその青空文庫タグをローカルの
 # 画像ファイル名に置換する
 #
+# 2025/04/20 ハーメルンの挿絵に対応した
+#
 import sys
 import os
 import re
@@ -21,9 +23,14 @@ def path_filter(title: str) -> str:
 
 # URLから画像ファイルをダウンロードして保存する
 def get_pic(url, file_name: str) -> str:
-    # なろうの挿絵URLはhttpd:が省略されているので補完する
-    if url.find('https:') != 0:
+    # なろうの挿絵URLはhttps:が省略されているので補完する
+    # ハーメルンではhttp:もあったりするのでチェックする
+    if (url.find('http:') != 0) and (url.find('https:') !=0):
         url = 'https:' + url
+    # http:をhttps:に書き換える(ハーメルン対応))
+    url = re.sub('http:', 'https:', url)
+    # ドメインがsyosetuであればimg.syosetuに書き換える(ハーメルン対応)
+    url = re.sub('//syosetu', '//img.syosetu', url)
     response = requests.get(url)
     pict  = response.content
     ptype = response.headers['Content-Type']
