@@ -205,7 +205,7 @@ object MainForm: TMainForm
   object OptBtn: TSpeedButton
     Left = 14
     Height = 22
-    Top = 361
+    Top = 360
     Width = 76
     Caption = '▼ オプション'
     Flat = True

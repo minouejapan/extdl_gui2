@@ -6,6 +6,7 @@
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.5 2025/05/04  ウィンドウ高さを決め打ちではなくDPI補正値を使用するようにした
     1.4 2025/05/03  ダウンロード結果もログ表示するようにした
                     ダークモードの自動切換えに対応した
     1.3 2025/04/21  外部実行ファイルの起動をShellExecuteExからRunCommandIndir(Lazarus依存)に
@@ -101,6 +102,8 @@ type
     AbortFlag: boolean;
     TextName,
     LogName: string;
+    HNormal,
+    HExpand: integer;
     function WMChangeCBChain(AwParam: WParam; AlParam: LParam):LRESULT;
     function WMDrawClipboard(AwParam: WParam; AlParam: LParam):LRESULT;
     procedure AddItems(URLList: string);
@@ -219,11 +222,19 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   ini: TIniFile;
   fn: string;
+  sdpi: integer;
+  wscale: double;
 begin
   Clipboard.Clear;
   InitFlag  := False;
   ExecFlag  := False;
   AbortFlag := False;
+
+  sdpi      := Screen.PixelsPerInch;
+  wscale    := sdpi / 96.0;
+
+  HNormal   := Trunc(390 * wscale);
+  HExpand   := Trunc(470 * wscale);
   // メッセージ処理を登録する
   PrevWndProc := Windows.WNDPROC(SetWindowLongPtr(Self.Handle, GWL_WNDPROC, PtrUInt(@WndCallback)));
   FNextClipboardOwner := SetClipboardViewer(Self.Handle);
@@ -298,8 +309,8 @@ begin
     4: pycmd := 'ruby';
     5: pycmd := 'perl';
   end;
-  if Height = 390 then
-    Height := 470;
+  if Height = HNormal then
+    Height := HExpand;
   CmdLog.Visible := True;
   CmdLogBtn.Down := True;
   PyStat.Caption := 'Scriptを実行中...';
@@ -413,7 +424,7 @@ begin
   ExecBtn.Enabled  := False;
   AbortBtn.Enabled := True;
   PyStat.Caption := '';
-  if Height = 390 then
+  if Height = HNormal then
     OptBtnClick(nil);
   CmdLog.Visible := True;
   CmdLogBtn.Down := True;
@@ -466,12 +477,12 @@ end;
 
 procedure TMainForm.OptBtnClick(Sender: TObject);
 begin
-  if Height = 390 then
+  if Height = HNormal then
   begin
-    Height := 470;
+    Height := HExpand;
     OptBtn.Caption := '▲ オプション';
   end else begin
-    Height := 390;
+    Height := HNormal;
     OptBtn.Caption := '▼ オプション';
     CmdLog.Visible := False;
     CmdLogBtn.Down := False;
