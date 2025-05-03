@@ -4,7 +4,10 @@
   Lazarus(ver3.2以降)でビルドする差に必要なライブラリ
     TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
+    MetaDarkStyel  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.4 2025/05/03  ダウンロード結果もログ表示するようにした
+                    ダークモードの自動切換えに対応した
     1.3 2025/04/21  外部実行ファイルの起動をShellExecuteExからRunCommandIndir(Lazarus依存)に
                     変更してスクリプトの実行結果(コンソール出力)を表示するようにした
     1.2 2025/04/18  ダウンロード後にPython/Ruby/Perlスクリプトを実行する機能を追加した
@@ -26,7 +29,8 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Clipbrd, Controls,
   Forms, Dialogs, StdCtrls, EditBtn, ExtCtrls, ComCtrls, Buttons, Menus,
-  DragDropInternet, LazUTF8, RegExpr, Types, IniFiles, ShellAPI, Process;
+  DragDropInternet, LazUTF8, RegExpr, Types, IniFiles, ShellAPI, Process,
+  uDarkStyleParams, uMetaDarkStyle, uDarkStyleSchemes;
 
 type
 
@@ -157,6 +161,7 @@ var
   ws: WideString;
   s: string;
   sl: TStringList;
+  pn: integer;
 begin
   case uMsg of
     WM_COPYDATA:
@@ -177,8 +182,12 @@ begin
           finally
             sl.Free;
           end;
-          PrgrsBar.Max := PCopyDataStruct(LParam).dwData - 1;
+          pn := PCopyDataStruct(LParam).dwData - 1;
+          PrgrsBar.Max := pn;
+          if pn = 0 then
+            pn := 1;
           NvTitle.Caption := 'タイトル：' + s;
+          CmdLog.Lines.Add('タイトル：' + s + ' (' + IntToStr(pn) + '話)');
           s := UTF8Copy(PathFilter(s), 1, 32);
           TextName := SaveFolder.Text + '\' + s + '.txt';
           LogName  := SaveFolder.Text + '\' + s + '.log';
@@ -364,9 +373,10 @@ begin
 
   PrgrsBar.Position := 0;
   if not FileExists(fnam) then
-	  NvTitle.Caption := 'エラー：ダウンロードに失敗しました.'
-  else begin
-	  NvTitle.Caption := 'ダウンロードしました.';
+  begin
+    CmdLog.Lines.Add('エラー：ダウンロードに失敗しました.'#13#10);
+  end else begin
+	  CmdLog.Lines.Add('ダウンロードしました.'#13#10);
     // ダウンロードしたテキストファイルを保存フォルダにタイトル名でコピーする
     // 保存ファイル名はそのままだと文字化けするので文字コードをAnsiに変換する
     CopyFile(PChar(fnam), PChar(UTF8ToWinCP(TextName)), False);
@@ -403,6 +413,11 @@ begin
   ExecBtn.Enabled  := False;
   AbortBtn.Enabled := True;
   PyStat.Caption := '';
+  if Height = 390 then
+    OptBtnClick(nil);
+  CmdLog.Visible := True;
+  CmdLogBtn.Down := True;
+
   cnt := URLList.Items.Count;
   for i := 1 to cnt do
   begin
