@@ -4,7 +4,7 @@
   Lazarus(ver3.2以降)でビルドする差に必要なライブラリ
     TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
-    MetaDarkStyel  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
+    MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
     1.4 2025/05/03  ダウンロード結果もログ表示するようにした
                     ダークモードの自動切換えに対応した
