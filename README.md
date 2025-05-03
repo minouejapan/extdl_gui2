@@ -49,4 +49,5 @@ Lazarus 3.2以降でプロジェクトファイルextdl_gui2.lpiを開いてビ�
 
 ・DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+・MeteDarkStyle LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
