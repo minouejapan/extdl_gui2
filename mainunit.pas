@@ -6,6 +6,7 @@
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.6 2025/05/08  ファイル名作成処理をShift-JIS変換からUTF16変換に変更した
     1.5 2025/05/04  ウィンドウ高さを決め打ちではなくDPI補正値を使用するようにした
     1.4 2025/05/03  ダウンロード結果もログ表示するようにした
                     ダークモードの自動切換えに対応した
@@ -138,15 +139,15 @@ var
 function PathFilter(PassName: string): string;
 var
   path: string;
-  tmp: AnsiString;
+  tmp: WideString;
 begin
   // ファイル名を一旦ShiftJISに変換して再度Unicode化することでShiftJISで使用
   // 出来ない文字を除去する
 {$IFDEF FPC}
-  tmp  := UTF8ToWinCP(PassName);
-  path := WinCPToUTF8(tmp);      // これでUTF-8依存文字は??に置き換わる
+  tmp  := UTF8ToUTF16(PassName);
+  path := UTF16ToUTF8(tmp);      // これでUTF-8依存文字は??に置き換わる
 {$ELSE}
-  tmp  := AnsiString(PassName);
+  tmp  := WideString(PassName);
 	path := string(tmp);
 {$ENDIF}
   // ファイル名として使用できない文字を'-'に置換する
@@ -191,7 +192,7 @@ begin
             pn := 1;
           NvTitle.Caption := 'タイトル：' + s;
           CmdLog.Lines.Add('タイトル：' + s + ' (' + IntToStr(pn) + '話)');
-          s := UTF8Copy(PathFilter(s), 1, 32);
+          s := UTF8Copy(PathFilter(s), 1, 48);
           TextName := SaveFolder.Text + '\' + s + '.txt';
           LogName  := SaveFolder.Text + '\' + s + '.log';
         end;
@@ -300,7 +301,6 @@ end;
 function TMainForm.ExecPython(TextName: string): boolean;
 var
   pycmd, cmdline, output: string;
-  n: integer;
 begin
   case PyCommand.ItemIndex of
     1: pycmd := 'py';
@@ -332,7 +332,6 @@ end;
 function TMainForm.Download(URL: string): boolean;
 var
   cmd, hstr, cdir, enam, fnam, lnam: string;
-  sl: TStringList;
   SXInfo: TShellExecuteInfo;
   ret: cardinal;
 begin
@@ -389,9 +388,9 @@ begin
   end else begin
 	  CmdLog.Lines.Add('ダウンロードしました.'#13#10);
     // ダウンロードしたテキストファイルを保存フォルダにタイトル名でコピーする
-    // 保存ファイル名はそのままだと文字化けするので文字コードをAnsiに変換する
-    CopyFile(PChar(fnam), PChar(UTF8ToWinCP(TextName)), False);
-    CopyFile(PChar(lnam), PChar(UTF8ToWinCP(LogName)), False);
+    // 保存ファイル名はそのままだと文字化けするので文字コードをUTF16に変換する
+    CopyFileW(PWideChar(UTF8ToUTF16(fnam)), PWideChar(UTF8ToUTF16(TextName)), False);
+    CopyFileW(PWideChar(UTF8ToUTF16(lnam)), PWideChar(UTF8ToUTF16(LogName)), False);
     // コピー出来たなら元のファイルを削除する
     if FileExists(LogName) then
       DeleteFile(lnam)

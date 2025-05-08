@@ -5,7 +5,7 @@ object MainForm: TMainForm
   Width = 640
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'ExtDL_GUI2 ver1.5'
+  Caption = 'ExtDL_GUI2 ver1.6'
   ClientHeight = 390
   ClientWidth = 640
   OnClose = FormClose
