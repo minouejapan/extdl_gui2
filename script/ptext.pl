@@ -3,6 +3,8 @@
 # Naro2mobi外部ダウンローダーでダウンロードした青空文庫形式準拠テキストを
 # プレーンテキストに変換する
 #
+# 2025/05/12 タグ除去処理を修正
+#
 use strict;
 use warnings;
 use utf8;
@@ -11,9 +13,8 @@ sub eliminate_tags {
     my ($str) = @_;
     my $tmp = $str;
 
+    $tmp =~ s/＃リンクの図（.*?）入る］//g;
     $tmp =~ s/［＃.*?］//g;
-    $tmp =~ s/［＃.*?（//g;
-    $tmp =~ s/）入る］//g;
     $tmp =~ s/｜//g;
     $tmp =~ s/《/（/g;
     $tmp =~ s/》/）/g;
