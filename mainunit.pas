@@ -613,11 +613,47 @@ begin
   end;
 end;
 
+function FindFileInSubdirectories(const BaseDir, FileName: string): string;
+var
+  SearchRec: TSearchRec;
+  FoundPath: string;
+begin
+  Result := '';
+  if FindFirst(IncludeTrailingPathDelimiter(BaseDir) + '*', faAnyFile, SearchRec) = 0 then
+  begin
+    repeat
+      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+      begin
+        if (SearchRec.Attr and faDirectory = 0) then
+        begin
+          if SameText(SearchRec.Name, FileName) then
+          begin
+            Result := IncludeTrailingPathDelimiter(BaseDir) + SearchRec.Name;
+            Exit;
+          end;
+        end
+        else if (SearchRec.Attr and faDirectory <> 0) then
+        begin
+          FoundPath := FindFileInSubdirectories(IncludeTrailingPathDelimiter(BaseDir) + SearchRec.Name, FileName);
+          if FoundPath <> '' then
+          begin
+            Result := FoundPath;
+            Exit;
+          end;
+        end;
+      end;
+    until FindNext(SearchRec) <> 0;
+    FindClose(SearchRec);
+  end;
+end;
+
 // 外部ダウンローダー定義ファイルを読み込む
 function TMainForm.LoadExtDLoader(FileName: string): Boolean;
 var
   extdl, extdat: TStringList;
   i: integer;
+  FoundPath: string;
+  BasePath: string;
 begin
   Result := False;
   ExtDLCnt := 0;
@@ -646,8 +682,15 @@ begin
             ExtDLDat[ExtDLCnt][4] := extdat[4]
           else
             ExtDLDat[ExtDLCnt][4] := '0';
-          if FileExists(ExtractFilePath(Application.ExeName) + ExtDLDat[ExtDLCnt][2]) then
-            URLList.Items.Add('　' + extdat[1] + ' (' + extdat[2] + ')');
+
+          FoundPath := FindFileInSubdirectories(ExtractFilePath(Application.ExeName), ExtDLDat[ExtDLCnt][2]);
+          if FoundPath <> '' then
+          begin
+            BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
+            ExtDLDat[ExtDLCnt][2] := ExtractRelativePath(BasePath, FoundPath);
+            URLList.Items.Add('　' + extdat[1] + ' (' + ExtDLDat[ExtDLCnt][2] + ')');
+          end;
+
           Inc(ExtDLCnt);
         end;
         if URLList.Items.Count = 1 then
