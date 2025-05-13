@@ -6,6 +6,7 @@
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.7 2025/05/14  保存フォルダを指定していない場合ダウンロードエラーとなる不具合を修正した
     1.6 2025/05/08  ファイル名作成処理をShift-JIS変換からUTF16変換に変更した
     1.5 2025/05/04  ウィンドウ高さを決め打ちではなくDPI補正値を使用するようにした
     1.4 2025/05/03  ダウンロード結果もログ表示するようにした
@@ -243,11 +244,13 @@ begin
   fn  := ExtractFilePath(Application.ExeName) + 'extdl_gui.ini';
   ini := TIniFile.Create(fn);
   try
-    SaveFolder.Text := ini.ReadString('Options', 'SaveFolder', ExtractFileDir(fn));
+    SaveFolder.Text := ini.ReadString('Options', 'SaveFolder', ExtractFileDir(Application.ExeName));
     PyCommand.ItemIndex := ini.ReadInteger('options', 'pycommand', 0);
     PyScript.Text := ini.ReadString('options', 'PyScript', '');
     Left := ini.ReadInteger('options', 'WindowsLeft', Left);
     Top  := ini.ReadInteger('options', 'WindowsTop', Top);
+    if not DirectoryExists(SaveFolder.Text) then
+      SaveFolder.Text := ExtractFileDir(Application.ExeName);
   finally
     ini.Free;
   end;
@@ -423,6 +426,8 @@ begin
   ExecBtn.Enabled  := False;
   AbortBtn.Enabled := True;
   PyStat.Caption := '';
+  if not DirectoryExists(SaveFolder.Text) then
+    SaveFolder.Text := ExtractFileDir(Application.ExeName);
   if Height = HNormal then
     OptBtnClick(nil);
   CmdLog.Visible := True;

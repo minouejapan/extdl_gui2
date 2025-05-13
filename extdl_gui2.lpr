@@ -20,9 +20,9 @@ uses
 
 begin
   RequireDerivedFormResource:=True;
-  Application.Scaled:=True;
   PreferredAppMode := pamAllowDark;
   uMetaDarkStyle.ApplyMetaDarkStyle(DefaultDark);
+  Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
