@@ -702,7 +702,7 @@ begin
   if FileExists(FileName) = False then
   begin
     // No ExtDLoader.txt
-    URLList.Items.Add('　' + FileName + 'がありません.');
+    URLList.Items.Add(FileName + ' がありません.');
   end
   else
   begin
