@@ -41,6 +41,15 @@ scriptフォルダ内のサンプルについて
 ver1.3からスクリプトの実行結果を確認出来るようになりました(スクリプトのSTDOUTへの出力を表示します)。
 ![extdl=gui2-5](https://github.com/user-attachments/assets/cbc7b50f-b644-4292-a131-8873ec34bb7c)
 
+scriptコマンドの追加・削除について
+
+　extdl_gui.iniファイルを編集することでScriptコマンドを追加したり削除したりすることが出来ます。
+
+　extdl_gui.ini内のエントリーScriptCommand=以降を編集して下さい。Scriptコマンド同士はカンマ","で区切ってください。
+
+　尚、ここで言うScriptコマンドとは、コマンドラインから実行出来るScript実行コマンドのことを言います。例えばcscriptを追加すればコンソール出力形式のVBScriptを実行出来るかもしれません(確実に出来るとは言っていない)。
+
+ 
 
 ## ビルド方法
 Lazarus 3.2以降でプロジェクトファイルextdl_gui2.lpiを開いてビルドして下さい。尚、ビルドするためには以下の追加ライブラリが必要です。
