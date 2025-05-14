@@ -1,5 +1,6 @@
 backup/
-downloaders/
+bin/*
+!bin/put_downloaders_will_be_here
 lib/
 dltxt.log
 dltxt.txt

@@ -8,6 +8,7 @@ object MainForm: TMainForm
   Caption = 'ExtDL_GUI2 ver1.7'
   ClientHeight = 390
   ClientWidth = 640
+  LCLVersion = '4.0.0.4'
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -26,7 +27,7 @@ object MainForm: TMainForm
     Left = 13
     Height = 15
     Top = 8
-    Width = 574
+    Width = 627
     Caption = 'ダウンロードするWeb小説トップページ&URL(URLをクリップボードにコピーまたはWebブラウザのアドレスバーからドラッグ＆ドロップ)'
     FocusControl = URLList
   end
@@ -45,15 +46,15 @@ object MainForm: TMainForm
     ButtonWidth = 23
     MaxLength = 0
     NumGlyphs = 1
-    OnButtonClick = SaveFolderButtonClick
     PasswordChar = #0
     TabOrder = 1
+    OnButtonClick = SaveFolderButtonClick
   end
   object Label2: TLabel
     Left = 87
     Height = 15
     Top = 404
-    Width = 85
+    Width = 91
     Caption = '保存フォルダ(&F)：'
     FocusControl = SaveFolder
   end
@@ -79,7 +80,7 @@ object MainForm: TMainForm
       Left = 116
       Height = 15
       Top = 30
-      Width = 50
+      Width = 53
       Caption = 'DL進捗：'
     end
     object PrgrsBar: TProgressBar
@@ -137,8 +138,8 @@ object MainForm: TMainForm
     Font.Name = 'Segoe MDL2 Assets'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
-    OnClick = OpenBtnClick
     ParentFont = False
+    OnClick = OpenBtnClick
   end
   object SaveBtn: TSpeedButton
     Left = 604
@@ -153,8 +154,8 @@ object MainForm: TMainForm
     Font.Name = 'Segoe MDL2 Assets'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
-    OnClick = SaveBtnClick
     ParentFont = False
+    OnClick = SaveBtnClick
   end
   object Label3: TLabel
     Left = 29
@@ -192,9 +193,9 @@ object MainForm: TMainForm
     ButtonWidth = 23
     MaxLength = 0
     NumGlyphs = 1
-    OnButtonClick = PyScriptButtonClick
     PasswordChar = #0
     TabOrder = 6
+    OnButtonClick = PyScriptButtonClick
   end
   object PyStat: TLabel
     Left = 116
@@ -242,8 +243,8 @@ object MainForm: TMainForm
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     GroupIndex = 1
-    OnClick = CmdLogBtnClick
     ParentFont = False
+    OnClick = CmdLogBtnClick
   end
   object Label5: TLabel
     Left = 28

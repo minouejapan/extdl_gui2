@@ -652,17 +652,32 @@ begin
   end;
 end;
 
+function JoinPath(Path1, Path2: string): string;
+begin
+  if (Length(Path1) > 0) and (Path1[Length(Path1)] <> '\') then
+    Path1 := Path1 + '\';
+  Result := Path1 + Path2;
+end;
+
 // 外部ダウンローダー定義ファイルを読み込む
 function TMainForm.LoadExtDLoader(FileName: string): Boolean;
 var
   extdl, extdat: TStringList;
   i: integer;
   FoundPath: string;
-  BasePath: string;
+  DirPath: string;
 begin
   Result := False;
   ExtDLCnt := 0;
-  if FileExists(FileName) then
+  // Find external downloaders from "./bin"
+  DirPath := JoinPath(ExtractFilePath(Application.ExeName), 'bin');
+
+  if FileExists(FileName) = False then
+  begin
+    // Download failed
+    URLList.Items.Add('　' + FileName + 'がありません.');
+  end
+  else
   begin
     extdl := TStringList.Create;
     try
@@ -679,22 +694,21 @@ begin
           extdat.CommaText := extdl[i];
           if extdat.Count < 5 then
             Continue;
+          FoundPath := FindFileInSubdirectories(DirPath, extdat[2]);
+          if FoundPath = '' then
+            Continue;
+
           ExtDLDat[ExtDLCnt][0] := extdat[0];
           ExtDLDat[ExtDLCnt][1] := extdat[1];
-          ExtDLDat[ExtDLCnt][2] := extdat[2];
+          ExtDLDat[ExtDLCnt][2] := ExtractRelativePath(ExtractFilePath(Application.ExeName), FoundPath);
           ExtDLDat[ExtDLCnt][3] := extdat[3];
+
           if extdat.Count > 4 then
             ExtDLDat[ExtDLCnt][4] := extdat[4]
           else
             ExtDLDat[ExtDLCnt][4] := '0';
 
-          FoundPath := FindFileInSubdirectories(ExtractFilePath(Application.ExeName), ExtDLDat[ExtDLCnt][2]);
-          if FoundPath <> '' then
-          begin
-            BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
-            ExtDLDat[ExtDLCnt][2] := ExtractRelativePath(BasePath, FoundPath);
-            URLList.Items.Add('　' + extdat[1] + ' (' + ExtDLDat[ExtDLCnt][2] + ')');
-          end;
+          URLList.Items.Add('　' + extdat[1] + ' (' + ExtDLDat[ExtDLCnt][2] + ')');
 
           Inc(ExtDLCnt);
         end;
