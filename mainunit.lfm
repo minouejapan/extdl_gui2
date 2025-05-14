@@ -13,6 +13,7 @@ object MainForm: TMainForm
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  LCLVersion = '3.6.0.0'
   object URLList: TListBox
     Left = 12
     Height = 236

@@ -1,12 +1,14 @@
 {
-  ExtDL_GUI
+  ExtDL_GUI2
 
   Lazarus(ver3.2以降)でビルドする差に必要なライブラリ
     TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.71     05/14  Scriptコマンドをiniファイルを編集することで追加・削除出来るようにした
     1.7 2025/05/14  保存フォルダを指定していない場合ダウンロードエラーとなる不具合を修正した
+                    Scriptコマンドをextdl_gui.iniファイルで編集できるようにした
     1.6 2025/05/08  ファイル名作成処理をShift-JIS変換からUTF16変換に変更した
     1.5 2025/05/04  ウィンドウ高さを決め打ちではなくDPI補正値を使用するようにした
     1.4 2025/05/03  ダウンロード結果もログ表示するようにした
@@ -245,10 +247,27 @@ begin
   ini := TIniFile.Create(fn);
   try
     SaveFolder.Text := ini.ReadString('Options', 'SaveFolder', ExtractFileDir(Application.ExeName));
-    PyCommand.ItemIndex := ini.ReadInteger('options', 'pycommand', 0);
     PyScript.Text := ini.ReadString('options', 'PyScript', '');
     Left := ini.ReadInteger('options', 'WindowsLeft', Left);
     Top  := ini.ReadInteger('options', 'WindowsTop', Top);
+    // Scroptコマンド
+    with PyCommand do
+    begin
+      Items.CommaText := Ini.ReadString('options', 'ScriptCommand', '');
+      // 初期状態ではiniファイルがないため読み込み結果が''の場合は初期値を設定して書き込む
+      if Items.CommaText = '' then
+      begin
+        Items.CommaText := '実行しない,py,python,python3,ruby,perl';
+        Ini.WriteString('options', 'ScriptCommand', Items.CommaText);
+      end;
+      // 最初のインデックスは'実行しない'固定なので違っていれば’実行しない’を先頭に挿入する
+      if Items[0] <> '実行しない' then
+      begin
+        Items.Insert(0, '実行しない');
+        Ini.WriteString('options', 'ScriptCommand', Items.CommaText);
+      end;
+      ItemIndex := ini.ReadInteger('options', 'pycommand', 0);
+    end;
     if not DirectoryExists(SaveFolder.Text) then
       SaveFolder.Text := ExtractFileDir(Application.ExeName);
   finally
@@ -305,13 +324,7 @@ function TMainForm.ExecPython(TextName: string): boolean;
 var
   pycmd, cmdline, output: string;
 begin
-  case PyCommand.ItemIndex of
-    1: pycmd := 'py';
-    2: pycmd := 'python';
-    3: pycmd := 'python3';
-    4: pycmd := 'ruby';
-    5: pycmd := 'perl';
-  end;
+  pycmd := PyCommand.Items[PyCommand.ItemIndex];
   if Height = HNormal then
     Height := HExpand;
   CmdLog.Visible := True;
