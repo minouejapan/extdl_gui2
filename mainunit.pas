@@ -631,37 +631,49 @@ begin
   end;
 end;
 
-function FindFileInSubdirectories(const BaseDir, FileName: string): string;
+procedure GetAllExeFiles(const Dir: string; ExeList: TStrings);
 var
   SearchRec: TSearchRec;
-  FoundPath: string;
+  Path: string;
 begin
-  Result := '';
-  if FindFirst(IncludeTrailingPathDelimiter(BaseDir) + '*', faAnyFile, SearchRec) = 0 then
+  Path := IncludeTrailingPathDelimiter(Dir);
+
+  // Find .exe files in the current directory
+  if FindFirst(Path + '*.exe', faAnyFile, SearchRec) = 0 then
   begin
     repeat
-      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+      if (SearchRec.Attr and faDirectory) = 0 then
+        ExeList.Add(Path + SearchRec.Name);
+    until FindNext(SearchRec) <> 0;
+    FindClose(SearchRec);
+  end;
+
+  // Recurse into subdirectories
+  if FindFirst(Path + '*', faDirectory, SearchRec) = 0 then
+  begin
+    repeat
+      if (SearchRec.Attr and faDirectory) <> 0 then
       begin
-        if (SearchRec.Attr and faDirectory = 0) then
-        begin
-          if SameText(SearchRec.Name, FileName) then
-          begin
-            Result := IncludeTrailingPathDelimiter(BaseDir) + SearchRec.Name;
-            Exit;
-          end;
-        end
-        else if (SearchRec.Attr and faDirectory <> 0) then
-        begin
-          FoundPath := FindFileInSubdirectories(IncludeTrailingPathDelimiter(BaseDir) + SearchRec.Name, FileName);
-          if FoundPath <> '' then
-          begin
-            Result := FoundPath;
-            Exit;
-          end;
-        end;
+        if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+          GetAllExeFiles(Path + SearchRec.Name, ExeList);
       end;
     until FindNext(SearchRec) <> 0;
     FindClose(SearchRec);
+  end;
+end;
+
+function FindExeFile(ExeList: TStrings; FileName: string): string;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 0 to ExeList.Count - 1 do
+  begin
+    if AnsiCompareText(ExtractFileName(ExeList[i]), FileName) = 0 then
+    begin
+      Result := ExeList[i];
+      Exit;
+    end;
   end;
 end;
 
@@ -677,22 +689,26 @@ function TMainForm.LoadExtDLoader(FileName: string): Boolean;
 var
   extdl, extdat: TStringList;
   i: integer;
+  ExeFiles: TStringList;
   FoundPath: string;
   DirPath: string;
 begin
   Result := False;
   ExtDLCnt := 0;
-  // Find external downloaders from "./bin"
-  DirPath := JoinPath(ExtractFilePath(Application.ExeName), 'bin');
+  
+  // Find external downloaders from "."
+  DirPath := ExtractFilePath(Application.ExeName);
 
   if FileExists(FileName) = False then
   begin
-    // Download failed
+    // No ExtDLoader.txt
     URLList.Items.Add('　' + FileName + 'がありません.');
   end
   else
   begin
     extdl := TStringList.Create;
+    ExeFiles := TStringList.Create;
+    GetAllExeFiles(DirPath, ExeFiles);
     try
       extdat := TStringList.Create;
       try
@@ -707,7 +723,7 @@ begin
           extdat.CommaText := extdl[i];
           if extdat.Count < 5 then
             Continue;
-          FoundPath := FindFileInSubdirectories(DirPath, extdat[2]);
+          FoundPath := FindExeFile(ExeFiles, extdat[2]);
           if FoundPath = '' then
             Continue;
 
@@ -732,6 +748,7 @@ begin
       end;
     finally
       extdl.Free;
+      ExeFiles.Free;
     end;
   end;
 end;

@@ -1,7 +1,6 @@
 backup/
-bin/*
-!bin/put_downloaders_will_be_here
 lib/
+modules/
 dltxt.log
 dltxt.txt
 extdl_gui.ini
