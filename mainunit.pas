@@ -631,17 +631,84 @@ begin
   end;
 end;
 
+procedure GetAllExeFiles(const Dir: string; ExeList: TStrings);
+var
+  SearchRec: TSearchRec;
+  Path: string;
+begin
+  Path := IncludeTrailingPathDelimiter(Dir);
+
+  // Find .exe files in the current directory
+  if FindFirst(Path + '*.exe', faAnyFile, SearchRec) = 0 then
+  begin
+    repeat
+      if (SearchRec.Attr and faDirectory) = 0 then
+        ExeList.Add(Path + SearchRec.Name);
+    until FindNext(SearchRec) <> 0;
+    FindClose(SearchRec);
+  end;
+
+  // Recurse into subdirectories
+  if FindFirst(Path + '*', faDirectory, SearchRec) = 0 then
+  begin
+    repeat
+      if (SearchRec.Attr and faDirectory) <> 0 then
+      begin
+        if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+          GetAllExeFiles(Path + SearchRec.Name, ExeList);
+      end;
+    until FindNext(SearchRec) <> 0;
+    FindClose(SearchRec);
+  end;
+end;
+
+function FindExeFile(ExeList: TStrings; FileName: string): string;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := 0 to ExeList.Count - 1 do
+  begin
+    if AnsiCompareText(ExtractFileName(ExeList[i]), FileName) = 0 then
+    begin
+      Result := ExeList[i];
+      Exit;
+    end;
+  end;
+end;
+
+function JoinPath(Path1, Path2: string): string;
+begin
+  if (Length(Path1) > 0) and (Path1[Length(Path1)] <> '\') then
+    Path1 := Path1 + '\';
+  Result := Path1 + Path2;
+end;
+
 // 外部ダウンローダー定義ファイルを読み込む
 function TMainForm.LoadExtDLoader(FileName: string): Boolean;
 var
   extdl, extdat: TStringList;
   i: integer;
+  ExeFiles: TStringList;
+  FoundPath: string;
+  DirPath: string;
 begin
   Result := False;
   ExtDLCnt := 0;
-  if FileExists(FileName) then
+  
+  // Find external downloaders from "."
+  DirPath := ExtractFilePath(Application.ExeName);
+
+  if FileExists(FileName) = False then
+  begin
+    // No ExtDLoader.txt
+    URLList.Items.Add(FileName + ' がありません.');
+  end
+  else
   begin
     extdl := TStringList.Create;
+    ExeFiles := TStringList.Create;
+    GetAllExeFiles(DirPath, ExeFiles);
     try
       extdat := TStringList.Create;
       try
@@ -656,16 +723,22 @@ begin
           extdat.CommaText := extdl[i];
           if extdat.Count < 5 then
             Continue;
+          FoundPath := FindExeFile(ExeFiles, extdat[2]);
+          if FoundPath = '' then
+            Continue;
+
           ExtDLDat[ExtDLCnt][0] := extdat[0];
           ExtDLDat[ExtDLCnt][1] := extdat[1];
-          ExtDLDat[ExtDLCnt][2] := extdat[2];
+          ExtDLDat[ExtDLCnt][2] := ExtractRelativePath(ExtractFilePath(Application.ExeName), FoundPath);
           ExtDLDat[ExtDLCnt][3] := extdat[3];
+
           if extdat.Count > 4 then
             ExtDLDat[ExtDLCnt][4] := extdat[4]
           else
             ExtDLDat[ExtDLCnt][4] := '0';
-          if FileExists(ExtractFilePath(Application.ExeName) + ExtDLDat[ExtDLCnt][2]) then
-            URLList.Items.Add('　' + extdat[1] + ' (' + extdat[2] + ')');
+
+          URLList.Items.Add('　' + extdat[1] + ' (' + ExtDLDat[ExtDLCnt][2] + ')');
+
           Inc(ExtDLCnt);
         end;
         if URLList.Items.Count = 1 then
@@ -675,6 +748,7 @@ begin
       end;
     finally
       extdl.Free;
+      ExeFiles.Free;
     end;
   end;
 end;

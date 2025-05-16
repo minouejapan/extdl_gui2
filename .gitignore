@@ -1,0 +1,14 @@
+backup/
+lib/
+modules/
+dltxt.log
+dltxt.txt
+extdl_gui.ini
+extdl_gui2.dbg
+extdl_gui2.exe
+extdl_gui2.lps
+extdl_gui2.res
+extdl_gui2.res
+regexpr_compilers.inc
+regexpr_unicodedata.pas
+regexpr.pas
