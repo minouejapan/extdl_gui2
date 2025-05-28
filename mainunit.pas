@@ -6,6 +6,8 @@
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.8 2025/05/28  shinich39さんからのpull requestをmergeした
+                    URLマッチ確認でマッチした場合はそのマッチURLだけを抽出するようにした
     1.71     05/14  Scriptコマンドをiniファイルを編集することで追加・削除出来るようにした
     1.7 2025/05/14  保存フォルダを指定していない場合ダウンロードエラーとなる不具合を修正した
                     Scriptコマンドをextdl_gui.iniファイルで編集できるようにした
@@ -112,7 +114,7 @@ type
     function WMDrawClipboard(AwParam: WParam; AlParam: LParam):LRESULT;
     procedure AddItems(URLList: string);
     procedure AddItem(URL: string);
-    function isMatchURL(URL, RePattern: string): Boolean;
+    function isMatchURL(URL, RePattern: string): string;
     function IsAffectURL(URL: string): string;
     function LoadExtDLoader(FileName: string): Boolean;
     function IsExtDLoader(URL: string): string;
@@ -310,7 +312,7 @@ begin
   Result := '';
   for i := 0 to ExtDLCnt do
   begin
-    if isMatchURL(URL, ExtDLDat[i][0]) then
+    if isMatchURL(URL, ExtDLDat[i][0]) <> '' then
     begin
       NvSite.Caption := ExtDLDat[i][1];
       Result := ExtDLDat[i][2];
@@ -623,7 +625,7 @@ begin
       URLList.Items.Clear;
       InitFlag := True;
     end;
-    URLList.Items.Add(URL);
+    URLList.Items.Add(furl);
     AddResult.Caption := 'URLを追加しました(' + IntToStr(URLList.Items.Count) + ')';
     SetForegroundWindow(Handle);
     if not ExecFlag then
@@ -754,18 +756,20 @@ begin
 end;
 
 // 正規表現によるURLチェック
-function TMainForm.isMatchURL(URL, RePattern: string): Boolean;
+function TMainForm.isMatchURL(URL, RePattern: string): string;
 var
   r: TRegExpr;
 begin
-  Result := False;
+  Result := '';
+
   if RePattern = '' then
     Exit;
   r := TRegExpr.Create;
   try
     r.InputString := URL;
     r.Expression  := RePattern;
-    Result := r.Exec;
+    if r.Exec then
+      Result := r.Match[0];
   finally
     r.Free;
   end;
@@ -784,7 +788,8 @@ begin
   furl := Trim(URL);
   for i := 0 to ExtDLCnt do
   begin
-    if isMatchURL(furl, ExtDLDat[i][0]) then
+    furl := isMatchURL(furl, ExtDLDat[i][0]);
+    if furl <> '' then
     begin
       Result := furl;
       Exit;
