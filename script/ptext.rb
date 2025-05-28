@@ -2,12 +2,11 @@
 # Naro2mobi外部ダウンローダーでダウンロードした青空文庫形式準拠テキストを
 # プレーンテキストに変換する
 #
-# 2025/05/12 タグ除去処理を修正
-#
 def eliminate_tags(str)
-  tmpstr = str
-  tmpstr = tmpstr.gsub(/［＃リンクの図（.*?）入る］/, '')
+	tmpstr = str
   tmpstr = tmpstr.gsub(/［＃.*?］/, '')
+  tmpstr = tmpstr.gsub(/［＃.*?（/, '')
+  tmpstr = tmpstr.gsub('）入る］', '')
   tmpstr = tmpstr.gsub('｜', '')
   tmpstr = tmpstr.gsub('《', '（')
   tmpstr = tmpstr.gsub('》', '）')
