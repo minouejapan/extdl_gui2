@@ -6,6 +6,7 @@
     DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.81     05/28  URLパターンマッチング処理を修正した
     1.8 2025/05/28  shinich39さんからのpull requestをmergeした
                     URLマッチ確認でマッチした場合はそのマッチURLだけを抽出するようにした
     1.71     05/14  Scriptコマンドをiniファイルを編集することで追加・削除出来るようにした
@@ -794,6 +795,7 @@ begin
       Result := furl;
       Exit;
     end;
+    furl := Trim(URL);
   end;
   AddResult.Caption := '追加できません：有効なURLではありません.';
 end;
