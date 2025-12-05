@@ -2,10 +2,11 @@
   ExtDL_GUI2
 
   Lazarus(ver3.2以降)でビルドする差に必要なライブラリ
-    TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
-    DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
-    MetaDarkStyle  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
+    TRegExpr        https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
+    DragDrop        LazarusのパッケージメニューにあるOnline Package Managerからインストールする
+    MetaDarkStyle   LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    1.9 2025/06/06  ファイル名と表示するタイトル名に青空文庫形式エスケープ文字のフィルターを追加した
     1.81     05/28  URLパターンマッチング処理を修正した
     1.8 2025/05/28  shinich39さんからのpull requestをmergeした
                     URLマッチ確認でマッチした場合はそのマッチURLだけを抽出するようにした
@@ -139,6 +140,16 @@ var
 
 { TMainForm }
 
+function DecodeAozoraTag(Src: string): string;
+var
+  tmp: string;
+begin
+  tmp := StringReplace(Src, '※［＃始め二重山括弧、1-1-52］',    '《', [rfReplaceAll]);
+  tmp := StringReplace(tmp, '※［＃終わり二重山括弧、1-1-53］',  '》', [rfReplaceAll]);
+  tmp := StringReplace(tmp, '※［＃縦線、1-1-35］',              '｜', [rfReplaceAll]);
+  Result := tmp;
+end;
+
 // タイトル名にファイル名として使用出来ない文字を'-'に置換する
 // Lazarus(FPC)とDelphiで文字コード変換方法が異なるためコンパイル環境で
 // 変換処理を切り替える
@@ -150,14 +161,16 @@ begin
   // ファイル名を一旦ShiftJISに変換して再度Unicode化することでShiftJISで使用
   // 出来ない文字を除去する
 {$IFDEF FPC}
-  tmp  := UTF8ToUTF16(PassName);
-  path := UTF16ToUTF8(tmp);      // これでUTF-8依存文字は??に置き換わる
+  tmp := UTF8ToUTF16(PassName);
+  tmp := UTF16ToUTF8(tmp);      // これでUTF-8依存文字は??に置き換わる
 {$ELSE}
-  tmp  := WideString(PassName);
-	path := string(tmp);
+  tmp := WideString(PassName);
+	tmp := string(tmp);
 {$ENDIF}
+  // 青空文庫形式エスケープのデコード処理
+  tmp := DecodeAozoraTag(tmp);
   // ファイル名として使用できない文字を'-'に置換する
-  path := ReplaceRegExpr('[\\/:;\*\?\+,."<>|\.\t ]', path, '-');
+  path := ReplaceRegExpr('[\\/:;\*\?\+,."<>|\.\t ]', tmp, '-');
 
   Result := path;
 end;
@@ -192,12 +205,12 @@ begin
           finally
             sl.Free;
           end;
-          pn := PCopyDataStruct(LParam).dwData - 1;
+          pn := PCopyDataStruct(LParam).dwData;
           PrgrsBar.Max := pn;
           if pn = 0 then
             pn := 1;
-          NvTitle.Caption := 'タイトル：' + s;
-          CmdLog.Lines.Add('タイトル：' + s + ' (' + IntToStr(pn) + '話)');
+          NvTitle.Caption := 'タイトル：' + DecodeAozoraTag(s);
+          CmdLog.Lines.Add('タイトル：' + DecodeAozoraTag(s) + ' (' + IntToStr(pn) + '話)');
           s := UTF8Copy(PathFilter(s), 1, 48);
           TextName := SaveFolder.Text + '\' + s + '.txt';
           LogName  := SaveFolder.Text + '\' + s + '.log';

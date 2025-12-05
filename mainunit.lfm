@@ -5,13 +5,14 @@ object MainForm: TMainForm
   Width = 640
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'ExtDL_GUI2 ver1.8'
+  Caption = 'ExtDL_GUI2 ver1.9'
   ClientHeight = 390
   ClientWidth = 640
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  LCLVersion = '3.6.0.0'
   object URLList: TListBox
     Left = 12
     Height = 236

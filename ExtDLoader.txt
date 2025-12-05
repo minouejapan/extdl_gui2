@@ -1,6 +1,6 @@
 "https://ncode.syosetu.com/n\d{4}\w{1,2}/",小説家になろう,na6dl.exe,narou.txt,0,1
 "https://novel18.syosetu.com/n\d{4}\w{1,2}/",なろうR18,na6dl.exe,narou.txt,0,1
-"https://kakuyomu.jp/works/\d{19,20}",カクヨム,kakuyomudl.exe,kakuyomu.txt,0,1
+"https://kakuyomu.jp/works/\d{18,20}",カクヨム,kakuyomudl.exe,kakuyomu.txt,0,1
 "https://www.alphapolis.co.jp/novel/\d{7,9}/\d{7,9}",アルファポリス,alphadlw.exe,alphapolis.txt,1,1
 "https://novelup.plus/story/\d{9,10}",ノベルアップ＋,novelupdl.exe,novelup.txt,0,1
 "https://estar.jp/(novels|extra_novels)/\d{7,8}",エブリスタ(スター特典含む),estardlw.exe,estar.txt,1,0
