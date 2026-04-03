@@ -3,11 +3,13 @@
 # に含まれる［リンクの図］をダウンロードしてその青空文庫タグをローカルの
 # 画像ファイル名に置換する
 #
+# 2026/04/03 挿絵がない場合はなにもしないようにした
 # 2025/05/12 重複画像のダウンロードをスキップするようにした
 # 2025/04/20 ハーメルンの挿絵に対応した
 #
 import sys
 import os
+import shutil
 import re
 import requests # ない場合はpip install requestsでインストールする
 
@@ -40,6 +42,8 @@ def get_pic(url, basedir, file_name: str) -> str:
     pname = ''
     rurl = response.url
     if rurl != url:
+        # 画像ファイル名の末尾が.580.jpgの場合はそれを削除してフルサイズファイル名にする
+        rurl = re.sub('.580.jpg', '', rurl)
         response = requests.get(rurl)
         pname = re.sub('http.*/', '', rurl)
     fname = ''
@@ -81,20 +85,21 @@ def get_pic(url, basedir, file_name: str) -> str:
 def url_to_pic(atxtfile: str):
     global pic_n
 
+    toutnm = os.path.basename(atxtfile) # ファイル名を保存
     crt_n = 1
     sys.stdout.write('リンクの図を検索中...\n')
     # 入力ファイル名のフォルダを準備する
-    fdn = path_filter(os.path.splitext(atxtfile)[0])
+    fdn = os.path.splitext(atxtfile)[0] # フォルダ名を準備
     if not os.path.isdir(fdn):
         os.mkdir(fdn)
     # 既にフォルダが存在すればフォルダ内のファイルを全て削除する
     else:
         sys.stdout.write('既にフォルダが存在するためフォルダ内のファイルを全て削除します.\n')
-        for file in os.scandir(fdn):
-            os.remove(file.path)
+        shutil.rmtree(fdn)
+        os.mkdir(fdn)
     # 入力ファイルと出力ファイルを開く
     fin = open(atxtfile, 'r', encoding='UTF-8')
-    fout = open(fdn + '\\' + atxtfile, 'w', encoding='UTF-8')
+    fout = open(fdn + '\\' + toutnm, 'w', encoding='UTF-8')
     for inline in fin.readlines():
         outline = inline
         purl = re.search('［＃リンクの図（.*?）入る］', inline)
@@ -106,13 +111,17 @@ def url_to_pic(atxtfile: str):
             if pfile != '':
                 outline = re.sub('［＃リンクの図（.*?）入る］', '［＃挿絵' + pnum + '（' + pfile + '）入る］', outline)
                 if dl_n > crt_n:
-                    sys.stdout.write('\r' + str(crt_n) + ' 個の挿絵画像をダウンロードしました.')
+                    sys.stdout.write('\r' + str(crt_n) + ' 個の挿絵画像をダウンロードしました.\n')
                     crt_n += 1
                 pic_n += 1
 
         fout.writelines(outline)
+    fin.close()
+    fout.close()
     if pic_n == 1:
         sys.stdout.write('\nリンクの図が見つかりませんでした.\n')
+        # 保存したテキストファイルをフォルダ毎削除する
+        shutil.rmtree(fdn)
     skip_n = pic_n - dl_n
     if skip_n > 0:
         sys.stdout.write('\n' + str(skip_n) + '個の挿絵画像が重複していたためスキップしました.')
