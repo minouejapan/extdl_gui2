@@ -3,7 +3,9 @@
 # に含まれる［リンクの図］をダウンロードしてその青空文庫タグをローカルの
 # 画像ファイル名に置換する
 #
-# 2026/04/03 挿絵がない場合はなにもしないようにした
+# 2026/04/04 挿絵がない場合はなにもしないようにした
+#            画像が縮小版(580.jpg)の場合は元画像のファイルを取得するようにした(なろう)
+#            挿絵タグ名に[各話見出し+番号]を使用するようにした
 # 2025/05/12 重複画像のダウンロードをスキップするようにした
 # 2025/04/20 ハーメルンの挿絵に対応した
 #
@@ -102,14 +104,20 @@ def url_to_pic(atxtfile: str):
     fout = open(fdn + '\\' + toutnm, 'w', encoding='UTF-8')
     for inline in fin.readlines():
         outline = inline
+        if re.search(r'［＃中見出し］.*?［＃中見出し終わり］', inline):
+            # 中身だしを取り出す
+            picid = re.sub('［＃中見出し］', '', inline)
+            picid = str.strip(re.sub('［＃中見出し終わり］', '', picid))
+            picid = picid[:8] + '_' # 8文字までに切り詰める
+            pic_n = 1 # カウンタをリセットする
         purl = re.search('［＃リンクの図（.*?）入る］', inline)
         if purl:
             url = re.sub('［＃リンクの図（', '', purl.group(0))
             url = re.sub('）入る］', '', url)
-            pnum = '{:04}'.format(pic_n)
+            pnum = '{:02}'.format(pic_n)
             pfile = get_pic(url, fdn, pnum)
             if pfile != '':
-                outline = re.sub('［＃リンクの図（.*?）入る］', '［＃挿絵' + pnum + '（' + pfile + '）入る］', outline)
+                outline = re.sub('［＃リンクの図（.*?）入る］', '［＃' + picid + pnum + '（' + pfile + '）入る］', outline)
                 if dl_n > crt_n:
                     sys.stdout.write('\r' + str(crt_n) + ' 個の挿絵画像をダウンロードしました.\n')
                     crt_n += 1
