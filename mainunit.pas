@@ -6,6 +6,7 @@
     DragDrop        LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle   LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    2.0 2026/04/08  MetaDarkStyleを削除した(ライセンスがLGPLのため)
     1.9 2025/06/06  ファイル名と表示するタイトル名に青空文庫形式エスケープ文字のフィルターを追加した
     1.81     05/28  URLパターンマッチング処理を修正した
     1.8 2025/05/28  shinich39さんからのpull requestをmergeした
@@ -38,8 +39,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Clipbrd, Controls,
   Forms, Dialogs, StdCtrls, EditBtn, ExtCtrls, ComCtrls, Buttons, Menus,
-  DragDropInternet, LazUTF8, RegExpr, Types, IniFiles, ShellAPI, Process,
-  uDarkStyleParams, uMetaDarkStyle, uDarkStyleSchemes;
+  DragDropInternet, LazUTF8, RegExpr, Types, IniFiles, ShellAPI, Process;
 
 type
 
