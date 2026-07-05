@@ -3,6 +3,7 @@
 # に含まれる［リンクの図］をダウンロードしてその青空文庫タグをローカルの
 # 画像ファイル名に置換する
 #
+# 2026/07/05 画像ダウンロード数の処理を修正した
 # 2026/04/04 挿絵がない場合はなにもしないようにした
 #            画像が縮小版(580.jpg)の場合は元画像のファイルを取得するようにした(なろう)
 #            挿絵タグ名に[各話見出し+番号]を使用するようにした
@@ -104,8 +105,9 @@ def url_to_pic(atxtfile: str):
     fout = open(fdn + '\\' + toutnm, 'w', encoding='UTF-8')
     for inline in fin.readlines():
         outline = inline
+        picid =''
         if re.search(r'［＃中見出し］.*?［＃中見出し終わり］', inline):
-            # 中身だしを取り出す
+            # 中見出しを取り出す
             picid = re.sub('［＃中見出し］', '', inline)
             picid = str.strip(re.sub('［＃中見出し終わり］', '', picid))
             picid = picid[:8] + '_' # 8文字までに切り詰める
@@ -126,7 +128,7 @@ def url_to_pic(atxtfile: str):
         fout.writelines(outline)
     fin.close()
     fout.close()
-    if pic_n == 1:
+    if crt_n == 1:
         sys.stdout.write('\nリンクの図が見つかりませんでした.\n')
         # 保存したテキストファイルをフォルダ毎削除する
         shutil.rmtree(fdn)
