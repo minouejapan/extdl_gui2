@@ -1,3 +1,5 @@
+#2.1 ハーメルンのR18作品URLがh.syosetuに変更されたことに対応
+#2.0
 "https://ncode.syosetu.com/n\d{4}\w{1,2}/",小説家になろう,na6dl.exe,narou.txt,0,1
 "https://novel18.syosetu.com/n\d{4}\w{1,2}/",なろうR18,na6dl.exe,narou.txt,0,1
 "https://kakuyomu.jp/works/\d{18,20}",カクヨム,kakuyomudl.exe,kakuyomu.txt,0,1
@@ -9,4 +11,4 @@
 "https://www.berrys-cafe.jp/book/n\d{7}",ベリーズカフェ,novemadl.exe,novema.txt,0,1
 "https://novel.daysneo.com/works/\w{32}.html",ノベルデイズ,nvldaysdl.exe,nvldays.txt,0,1
 "https://novema.jp/book/n\d{7}",ノベマ！,novemadl.exe,novema.txt,0,1
-"https://syosetu.org/novel/\d{1,7}(/|)",ハーメルン,hamelndlw.exe,hameln.txt,1,1
+"https://(h.|)syosetu.org/novel/\d{1,7}(/|)",ハーメルン,hamelndlw.exe,hameln.txt,1,1
