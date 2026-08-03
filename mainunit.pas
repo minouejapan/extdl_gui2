@@ -6,6 +6,7 @@
     DragDrop        LazarusのパッケージメニューにあるOnline Package Managerからインストールする
     MetaDarkStyle   LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    2.1 2026/08/03  IsMatchURLがURLに付随したオプションスイッチを削除してしまう不具合を修正した
     2.0 2026/04/08  MetaDarkStyleを削除した(ライセンスがLGPLのため)
     1.9 2025/06/06  ファイル名と表示するタイトル名に青空文庫形式エスケープ文字のフィルターを追加した
     1.81     05/28  URLパターンマッチング処理を修正した
@@ -255,6 +256,7 @@ begin
 
   HNormal   := Trunc(390 * wscale);
   HExpand   := Trunc(470 * wscale);
+
   // メッセージ処理を登録する
   PrevWndProc := Windows.WNDPROC(SetWindowLongPtr(Self.Handle, GWL_WNDPROC, PtrUInt(@WndCallback)));
   FNextClipboardOwner := SetClipboardViewer(Self.Handle);
@@ -719,9 +721,7 @@ begin
   begin
     // No ExtDLoader.txt
     URLList.Items.Add(FileName + ' がありません.');
-  end
-  else
-  begin
+  end else begin
     extdl := TStringList.Create;
     ExeFiles := TStringList.Create;
     GetAllExeFiles(DirPath, ExeFiles);
@@ -783,7 +783,7 @@ begin
     r.InputString := URL;
     r.Expression  := RePattern;
     if r.Exec then
-      Result := r.Match[0];
+      Result := URL;//r.Match[0];
   finally
     r.Free;
   end;
