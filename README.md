@@ -42,7 +42,7 @@ ver1.3からスクリプトの実行結果を確認出来るようになりま�
  
 
 ## ビルド方法
-Lazarus 3.2以降でプロジェクトファイルextdl_gui2.lpiを開いてビルドして下さい。尚、ビルドするためには以下の追加ライブラリが必要です。<br>
+Lazarus ~~3.2~~ 4.0以降でプロジェクトファイルextdl_gui2.lpiを開いてビルドして下さい。尚、ビルドするためには以下の追加ライブラリが必要です。<br>
 - TRegExpr  https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
 - DragDrop  LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 - ~~MeteDarkStyle LazarusのパッケージメニューにあるOnline Package Managerからインストールする~~
