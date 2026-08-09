@@ -5,7 +5,7 @@ object MainForm: TMainForm
   Width = 640
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = 'ExtDL_GUI2 ver2.1'
+  Caption = 'ExtDL_GUI2 ver2.2'
   ClientHeight = 390
   ClientWidth = 640
   LCLVersion = '4.8.0.0'
@@ -42,8 +42,9 @@ object MainForm: TMainForm
     Height = 23
     Top = 400
     Width = 446
-    ButtonCaption = '・・・'
     ButtonWidth = 23
+    Images = ImageList1
+    ImageIndex = 0
     MaxLength = 0
     NumGlyphs = 1
     PasswordChar = #0
@@ -189,8 +190,9 @@ object MainForm: TMainForm
     Height = 23
     Top = 432
     Width = 446
-    ButtonCaption = '・・・'
     ButtonWidth = 23
+    Images = ImageList1
+    ImageIndex = 0
     MaxLength = 0
     NumGlyphs = 1
     PasswordChar = #0
@@ -298,5 +300,13 @@ object MainForm: TMainForm
     Filter = 'スクリプトファイル(*.py,*.rb,*.pl)|*.py;*.rb;*.pl;|全てのファイル(*.*)|*.*'
     Left = 352
     Top = 201
+  end
+  object ImageList1: TImageList
+    Left = 409
+    Top = 200
+    Bitmap = {
+      4C7A010000001000000010000000190000000000000078DA63601805C304FC87
+      6272C4A8A17F140C410000E1650BF5
+    }
   end
 end

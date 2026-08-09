@@ -1,11 +1,11 @@
 {
   ExtDL_GUI2
 
-  Lazarus(ver3.2以降)でビルドする差に必要なライブラリ
+  Lazarus(ver4.0以降)でビルドする差に必要なライブラリ
     TRegExpr        https://github.com/andgineer/TRegExprからCloneまたはダウンロードする
     DragDrop        LazarusのパッケージメニューにあるOnline Package Managerからインストールする
-    MetaDarkStyle   LazarusのパッケージメニューにあるOnline Package Managerからインストールする
 
+    2.2 2026/08/07  スクリプトコマンドに"cmd"を追加してexeファイルを直接実行できるようにした
     2.1 2026/08/03  IsMatchURLがURLに付随したオプションスイッチを削除してしまう不具合を修正した
     2.0 2026/04/08  MetaDarkStyleを削除した(ライセンスがLGPLのため)
     1.9 2025/06/06  ファイル名と表示するタイトル名に青空文庫形式エスケープ文字のフィルターを追加した
@@ -56,6 +56,7 @@ type
   {$ENDIF}
   TMainForm = class(TForm)
     CmdLog: TMemo;
+		ImageList1: TImageList;
     Label5: TLabel;
     OD2: TOpenDialog;
     PyStat: TLabel;
@@ -275,7 +276,7 @@ begin
       // 初期状態ではiniファイルがないため読み込み結果が''の場合は初期値を設定して書き込む
       if Items.CommaText = '' then
       begin
-        Items.CommaText := '実行しない,py,python,python3,ruby,perl';
+        Items.CommaText := '実行しない,py,python,python3,ruby,perl,cmd';
         Ini.WriteString('options', 'ScriptCommand', Items.CommaText);
       end;
       // 最初のインデックスは'実行しない'固定なので違っていれば’実行しない’を先頭に挿入する
@@ -337,7 +338,7 @@ begin
   end;
 end;
 
-// TextNameで指定されたテキストファイルにPythonスクリプトを実行する
+// TextNameで指定されたテキストファイルにPython(などの)スクリプトを実行する
 function TMainForm.ExecPython(TextName: string): boolean;
 var
   pycmd, cmdline, output: string;
@@ -352,8 +353,14 @@ begin
   cmdline := '> ' + pycmd + ' "' + PyScript.Text + '" "' + TextName + '"';
   CmdLog.Lines.Add(cmdline);
   // Lazarusに依存
-  Result := RunCommandIndir(SaveFolder.Text, pycmd, ['"' + PyScript.Text + '"', '"' + TextName + '"'],
-                            output, [poWaitOnExit], swoHide);
+  if pycmd <> 'cmd' then
+    // Python等のスクリプトを実行する
+    Result := RunCommandIndir(SaveFolder.Text, pycmd, ['"' + PyScript.Text + '"', '"' + TextName + '"'],
+                              output, [poWaitOnExit], swoHide)
+  else
+    // cmdの場合はexeファイルを直接実行する
+    Result := RunCommandIndir(SaveFolder.Text, '"' + PyScript.Text + '"', ['"' + TextName + '"'],
+                              output, [poWaitOnExit], swoHide);
   CmdLog.Text := CmdLog.Text + #13#10 + WinCPToUTF8(output);
   CmdLog.VertScrollBar.Position := 1000000; // 強引な強制スクロール処理
   if Result then
@@ -437,9 +444,9 @@ begin
       begin
         if FileExists(PyScript.Text) then
           if ExecPython(ExtractFileName(TextName)) then
-            NvTitle.Caption := 'Pythonスクリプトでダウンロードファイルを処理しました.'
+            NvTitle.Caption := 'スクリプトでダウンロードファイルを処理しました.'
           else
-            NvTitle.Caption := 'Pythonスクリプトの実行に失敗しました.';
+            NvTitle.Caption := 'スクリプトの実行に失敗しました.';
       end;
     end else
       NvTitle.Caption := 'エラー：ダウンロードテキストの保存に失敗しました.';

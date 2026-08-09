@@ -1,22 +1,16 @@
 program extdl_gui2;
 
-{$mode objfpc}{$H+}
+{$MODE DELPHI}
+{$CODEPAGE UTF8}
 
 uses
-  {$IFDEF UNIX}
-  cthreads,
-  {$ENDIF}
-  {$IFDEF HASAMIGA}
-  athreads,
-  {$ENDIF}
-  Interfaces, // this includes the LCL widgetset
-  Forms, MainUnit
-  { you can add units after this };
+  Interfaces,
+  Forms, MainUnit;
 
 {$R *.res}
 
 begin
-			Application.Scaled:=True;
+	Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
