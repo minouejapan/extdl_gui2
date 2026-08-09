@@ -18,6 +18,7 @@ Extdl_GUI2.exeを起動すると、最初に使用できる外部ダウンロー
 - py/pytho/pytho3・・・Pytheoスクリプト
 - ruby・・・rubyスクリプト
 - perl・・・perlスクリプト
+- cmd ・・・Windows実行ファイル\(\*.exe\)
 です。<br>
 尚、これらのスクリプトを実行するためには、それぞれの実行環境のインストールが必要です。<br>
 <br>
